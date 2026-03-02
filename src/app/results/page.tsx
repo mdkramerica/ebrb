@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Download, FileText, Mail, Copy, CheckCircle, ChevronRight, BarChart3, MessageSquare, ArrowRight } from "lucide-react";
 
 type ActiveDoc = "resume" | "cover" | "ats";
 type ActiveTab = "preview" | "redline";
+
+const REDLINE_CHANGES = [
+  { section: "Summary", type: "rewrite", before: "Experienced epidemiologist with 22 years...", after: "Senior infectious disease epidemiologist with 22 years directing surveillance systems...", reason: "Repositioned from credential-heavy to leadership value proposition" },
+  { section: "Section added", type: "add", before: "(none)", after: "KEY ACCOMPLISHMENTS — 5 cross-career quantified outcomes", reason: "Increases 6-11 second skim impact; directly mirrors posting language" },
+  { section: "MDH Role mandate", type: "rewrite", before: "MDH Epidemiologist responsibilities included...", after: "Mandate: Provide field epidemiology leadership for 12 rural counties...", reason: "Converted task list to mandate + outcomes structure" },
+];
 
 const RESUME_PREVIEW = `SARA LOVETT, MPH
 St. Paul, Minnesota | (704) 907-0568 | sara.lovett@state.mn.com
@@ -51,11 +57,60 @@ export default function ResultsPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("preview");
   const [refineInput, setRefineInput] = useState("");
   const [copied, setCopied] = useState(false);
+  const [results, setResults] = useState<Record<string, unknown> | null>(null);
+  const [refining, setRefining] = useState(false);
+
+  // Load real results from sessionStorage
+  useEffect(() => {
+    const raw = sessionStorage.getItem("ebrb_results");
+    if (raw) {
+      try { setResults(JSON.parse(raw)); } catch { /* use fallback */ }
+    }
+  }, []);
+
+  const resumeContent = (results?.resume as string) || RESUME_PREVIEW;
+  const coverLetterContent = (results?.coverLetter as string) || "Cover letter not available.";
+  const atsReportData = (results?.atsReport as { keywords: typeof ATS_KEYWORDS } | undefined);
+  const redlineData = (results?.redlineChanges as typeof REDLINE_CHANGES | undefined);
+
+  const activeContent = activeDoc === "resume" ? resumeContent : activeDoc === "cover" ? coverLetterContent : "";
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(RESUME_PREVIEW);
+    navigator.clipboard.writeText(activeContent);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRefine = async () => {
+    if (!refineInput.trim() || refining) return;
+    setRefining(true);
+    try {
+      const form = JSON.parse(sessionStorage.getItem("ebrb_form") || "{}");
+      const res = await fetch("/api/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: results?.sessionId,
+          instruction: refineInput,
+          docType: activeDoc === "resume" ? "resume" : activeDoc === "cover" ? "cover_letter" : "ats_report",
+          currentContent: activeContent,
+        }),
+      });
+      const data = await res.json();
+      if (data.refined && results) {
+        const updated = {
+          ...results,
+          [activeDoc === "resume" ? "resume" : "coverLetter"]: data.refined,
+        };
+        setResults(updated);
+        sessionStorage.setItem("ebrb_results", JSON.stringify(updated));
+      }
+      setRefineInput("");
+    } catch (e) {
+      console.error("Refine error:", e);
+    } finally {
+      setRefining(false);
+    }
   };
 
   return (
