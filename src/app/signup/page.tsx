@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/results";
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,7 +29,7 @@ export default function SignupPage() {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/results`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
       },
     });
 
@@ -39,7 +41,7 @@ export default function SignupPage() {
 
     // If user is immediately confirmed (email confirmation disabled), redirect
     if (data.session) {
-      router.push("/results");
+      router.push(redirect);
       router.refresh();
       return;
     }
@@ -54,7 +56,7 @@ export default function SignupPage() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=/results`,
+        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
       },
     });
   };

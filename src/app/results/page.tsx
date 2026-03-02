@@ -152,32 +152,50 @@ export default function ResultsPage() {
   const [atsReport, setAtsReport] = useState<AtsReport>(DEMO_ATS);
   const [isDemo, setIsDemo] = useState(true);
 
-  // Load real results from sessionStorage on mount
+  // Load results: try localStorage first, then DB fallback for authenticated users
   useEffect(() => {
+    let loaded = false;
+
+    // Try localStorage
     try {
-      const raw = sessionStorage.getItem("ebrb_results");
-      if (!raw) return;
-      const data: Results = JSON.parse(raw);
-      if (data.resume) {
-        setResume(data.resume);
-        setIsDemo(false);
-      }
-      if (data.coverLetter) {
-        setCoverLetter(data.coverLetter);
-      }
-      if (data.atsReport) {
-        setAtsReport(parseAtsReport(data.atsReport));
+      const raw = localStorage.getItem("ebrb_results");
+      if (raw) {
+        const data: Results = JSON.parse(raw);
+        if (data.resume) {
+          setResume(data.resume);
+          setCoverLetter(data.coverLetter || DEMO_COVER);
+          if (data.atsReport) setAtsReport(parseAtsReport(data.atsReport));
+          setIsDemo(false);
+          loaded = true;
+        }
       }
     } catch (e) {
-      console.error("Failed to load results from session:", e);
+      console.error("Failed to load results from localStorage:", e);
     }
-  }, []);
+
+    // If no local data but user is authenticated, fetch from DB
+    if (!loaded && user) {
+      fetch("/api/my-results")
+        .then((res) => (res.ok ? res.json() : Promise.reject()))
+        .then((data: Results) => {
+          if (data.resume) {
+            setResume(data.resume);
+            setCoverLetter(data.coverLetter || DEMO_COVER);
+            if (data.atsReport) setAtsReport(parseAtsReport(data.atsReport));
+            setIsDemo(false);
+            // Cache in localStorage for next time
+            localStorage.setItem("ebrb_results", JSON.stringify(data));
+          }
+        })
+        .catch(() => {}); // No DB results either — show demo
+    }
+  }, [user]);
 
   // Claim anonymous session after login
   useEffect(() => {
     if (!user) return;
     try {
-      const raw = sessionStorage.getItem("ebrb_results");
+      const raw = localStorage.getItem("ebrb_results");
       if (!raw) return;
       const { sessionToken } = JSON.parse(raw);
       if (sessionToken) {
@@ -381,13 +399,13 @@ export default function ResultsPage() {
                   Create a free account to view your full resume, cover letter, and ATS report. Download in PDF, Word, or plain text.
                 </p>
                 <Link
-                  href="/signup"
+                  href="/signup?redirect=/results"
                   className="block w-full bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold py-3 text-sm transition-colors mb-3"
                 >
                   Create Free Account
                 </Link>
                 <Link
-                  href="/login"
+                  href="/login?redirect=/results"
                   className="block w-full border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#9CA3AF] hover:text-[#F9F7F3] py-3 text-sm transition-colors"
                 >
                   Already have an account? Sign in

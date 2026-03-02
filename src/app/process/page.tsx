@@ -95,7 +95,7 @@ export default function ProcessPage() {
       })
       .then((data) => {
         // Store results for the results page
-        sessionStorage.setItem("ebrb_results", JSON.stringify(data));
+        localStorage.setItem("ebrb_results", JSON.stringify(data));
         setApiDone(true);
       })
       .catch((err) => {
