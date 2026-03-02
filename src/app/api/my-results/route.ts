@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = await createSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
@@ -11,14 +11,22 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get the user's most recent session
-    const { data: session, error: sessionError } = await getSupabaseAdmin()
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get('sessionId');
+
+    // Get a specific session or the most recent one
+    const query = getSupabaseAdmin()
       .from('sessions')
       .select('id, session_token')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+      .eq('user_id', user.id);
+
+    if (sessionId) {
+      query.eq('id', sessionId);
+    } else {
+      query.order('created_at', { ascending: false }).limit(1);
+    }
+
+    const { data: session, error: sessionError } = await query.single();
 
     if (sessionError || !session) {
       return NextResponse.json({ error: 'No results found' }, { status: 404 });

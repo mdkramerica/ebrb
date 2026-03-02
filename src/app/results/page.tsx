@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FileText, Mail, Copy, CheckCircle, ChevronRight, BarChart3, Lock } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { Nav } from "@/components/Nav";
@@ -145,6 +146,8 @@ function downloadBlob(blob: Blob, filename: string) {
 
 export default function ResultsPage() {
   const { user, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session");
   const [activeDoc, setActiveDoc] = useState<"resume" | "cover" | "ats">("resume");
   const [copied, setCopied] = useState(false);
   const [resume, setResume] = useState(DEMO_RESUME);
@@ -152,8 +155,24 @@ export default function ResultsPage() {
   const [atsReport, setAtsReport] = useState<AtsReport>(DEMO_ATS);
   const [isDemo, setIsDemo] = useState(true);
 
-  // Load results: try localStorage first, then DB fallback for authenticated users
+  // Load results: specific session from URL, localStorage, or DB fallback
   useEffect(() => {
+    // If a specific session is requested, always fetch from DB
+    if (sessionId && user) {
+      fetch(`/api/my-results?sessionId=${sessionId}`)
+        .then((res) => (res.ok ? res.json() : Promise.reject()))
+        .then((data: Results) => {
+          if (data.resume) {
+            setResume(data.resume);
+            setCoverLetter(data.coverLetter || DEMO_COVER);
+            if (data.atsReport) setAtsReport(parseAtsReport(data.atsReport));
+            setIsDemo(false);
+          }
+        })
+        .catch(() => {}); // Session not found — show demo
+      return;
+    }
+
     let loaded = false;
 
     // Try localStorage
@@ -189,7 +208,7 @@ export default function ResultsPage() {
         })
         .catch(() => {}); // No DB results either — show demo
     }
-  }, [user]);
+  }, [user, sessionId]);
 
   // Claim anonymous session after login
   useEffect(() => {

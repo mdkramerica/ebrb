@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { User, LogOut, FileText, Clock } from "lucide-react";
+import { User, LogOut, FileText, Clock, ChevronRight } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface Profile {
@@ -146,9 +146,10 @@ export default function ProfileClient({
             ) : (
               <div className="space-y-2">
                 {sessions.map((s) => (
-                  <div
+                  <Link
                     key={s.id}
-                    className="bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#C5933A]/30 transition-colors"
+                    href={`/results?session=${s.id}`}
+                    className="block bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#C5933A]/30 transition-colors cursor-pointer"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
@@ -166,14 +167,17 @@ export default function ProfileClient({
                           </span>
                         </div>
                       </div>
-                      <div className="text-[10px] text-[#6B7280] whitespace-nowrap">
-                        {new Date(s.created_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })}
+                      <div className="flex items-center gap-2">
+                        <div className="text-[10px] text-[#6B7280] whitespace-nowrap">
+                          {new Date(s.created_at).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </div>
+                        <ChevronRight size={12} className="text-[#6B7280]" />
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
