@@ -8,6 +8,90 @@ import {
   ChevronRight, BarChart3, ArrowRight, Loader2, X
 } from "lucide-react";
 
+// ─── Demo / fallback content (shown when no real session data exists) ─────────
+const DEMO_RESUME = `ALEX MORGAN, MBA
+Chicago, Illinois | alex.morgan@email.com | (312) 555-0192
+
+VALUE PROPOSITION
+Senior operations executive with 15 years of cross-functional leadership in pharmaceutical distribution and supply chain strategy. Trusted advisor to C-suite stakeholders with demonstrated success directing teams of 50+, driving $40M+ in cost savings, and building scalable infrastructure across high-compliance environments.
+
+KEY ACCOMPLISHMENTS
+• Directed end-to-end supply chain transformation across 12 distribution centers, reducing fulfillment cycle time by 34% and achieving $18M in annual cost savings.
+• Led cross-functional team of 60 in executing FDA regulatory remediation program — zero findings at follow-up audit.
+• Negotiated and integrated three third-party logistics partnerships, expanding distribution capacity by 40% without capital investment.
+• Spearheaded ERP implementation across four business units, delivering on-time and $2M under budget.
+• Established governance framework for vendor performance management, improving on-time delivery rates from 82% to 97%.
+
+PROFESSIONAL EXPERIENCE
+
+MERIDIAN PHARMA LOGISTICS — Chicago, IL
+Vice President, Supply Chain Operations | 2019 – Present
+
+Mandate: Provide strategic and operational leadership for pharmaceutical distribution network spanning 12 facilities and $800M in annual product movement, driving continuous improvement, regulatory compliance, and cost efficiency across the enterprise.
+
+Selected Outcomes:
+• Redesigned distribution network architecture, consolidating 4 redundant facilities and saving $18M annually.
+• Built and led a 60-person operations team through two acquisitions and a complete ERP migration.
+• Established quality management framework that achieved 100% on-time regulatory submission record.
+• Directed COVID-19 supply continuity response, maintaining 99.2% service levels throughout peak disruption.
+
+NORTHGATE DISTRIBUTION GROUP — Chicago, IL
+Director, Operations | 2014 – 2019
+
+Mandate: Lead operational strategy and daily execution for multi-site distribution network serving retail and institutional pharmaceutical clients across the Midwest.
+
+Selected Outcomes:
+• Grew operational capacity by 35% through process redesign and facility optimization.
+• Reduced operating costs by $7.2M over three years through vendor renegotiation and lean initiatives.
+• Launched a predictive inventory model that cut stockouts by 61%.`;
+
+const DEMO_COVER_LETTER = `Alex Morgan, MBA
+Chicago, Illinois | alex.morgan@email.com | (312) 555-0192
+
+March 2, 2026
+
+Hiring Committee
+[Target Organization]
+Re: Vice President, Supply Chain & Distribution Operations | Requisition #[ID]
+
+With 15 years of progressive leadership in pharmaceutical supply chain operations — including six years as VP overseeing an $800M distribution network — I am confident in my readiness to deliver immediate impact in this role.
+
+In my current position at Meridian Pharma Logistics, I direct supply chain operations across 12 facilities, leading a 60-person team while maintaining full regulatory compliance and driving measurable efficiency improvements. Most recently, I led a network redesign that eliminated four redundant distribution centers and generated $18M in annual savings — while simultaneously managing two acquisitions and a full ERP migration.
+
+What distinguishes my background is the combination of operational depth and strategic reach. I have built governance frameworks, negotiated complex logistics partnerships, and led enterprise-wide technology implementations — all within the highly regulated pharmaceutical environment your organization operates in. My track record is not aspirational; it is demonstrated.
+
+I would welcome the opportunity to discuss how my experience aligns with your priorities. I am available at your convenience.
+
+Sincerely,
+Alex Morgan, MBA`;
+
+const DEMO_ATS: ATSReport = {
+  beforeScore: 79,
+  afterScore: 94,
+  keywords: [
+    { label: "Supply chain strategy", before: true, after: true },
+    { label: "Cross-functional leadership", before: true, after: true },
+    { label: "Regulatory compliance", before: false, after: true, note: "Added" },
+    { label: "ERP implementation", before: true, after: true },
+    { label: "Vendor management", before: false, after: true, note: "Added" },
+    { label: "Continuous improvement", before: false, after: true, note: "Added" },
+    { label: "P&L ownership", before: true, after: true },
+    { label: "Team leadership 50+", before: false, after: true, note: "Added" },
+  ],
+  microAdjustments: [
+    "Replace 'managed' with 'directed' in role mandate (matches posting language)",
+    "Add 'enterprise-wide' qualifier to ERP bullet (posting uses this phrase 3x)",
+    "Include specific compliance framework name (e.g. cGMP, GDP) in opening paragraph",
+  ],
+  finalAssessment: "Highly competitive. Your cross-functional depth and regulated-industry track record are rare at this level. Primary differentiation is the combination of cost reduction scale ($25M+) and zero-defect compliance record.",
+};
+
+const DEMO_REDLINE: RedlineChange[] = [
+  { section: "Summary", type: "rewrite", before: "Experienced supply chain professional with 15 years in pharma distribution.", after: "VALUE PROPOSITION: Senior operations executive with 15 years of cross-functional leadership in pharmaceutical distribution and supply chain strategy.", reason: "Repositioned from credential-forward to leadership-forward. Removed 'experienced' (generic). Added scope and mandate." },
+  { section: "Key Accomplishments", type: "add", before: "(section did not exist)", after: "6 cross-career quantified outcomes aligned to posting language", reason: "Increases 6-11 second skim impact. Hiring managers read this section first after the summary." },
+  { section: "Role formatting", type: "rewrite", before: "VP, Supply Chain — Responsibilities included managing team, overseeing logistics...", after: "Mandate: Provide strategic and operational leadership for pharmaceutical distribution network spanning 12 facilities...", reason: "Converted task list to Mandate + Selected Outcomes. Scope indicators added (12 facilities, $800M, 60-person team)." },
+];
+
 type ActiveDoc = "resume" | "cover" | "ats";
 type ActiveTab = "preview" | "redline";
 
@@ -115,26 +199,22 @@ export default function ResultsPage() {
   const [emailSent, setEmailSent] = useState(false);
   const refineRef = useRef<HTMLInputElement>(null);
 
-  // Load results from sessionStorage
+  // Load results from sessionStorage, fall back to demo content
   useEffect(() => {
     const raw = sessionStorage.getItem("ebrb_results");
-    if (raw) {
-      try {
-        const parsed: Results = JSON.parse(raw);
-        setResults(parsed);
-        setVersions([{
-          label: "v1 — Original",
-          resume: parsed.resume || "",
-          coverLetter: parsed.coverLetter || "",
-        }]);
-        setCurrentVersion(0);
-      } catch { /* use fallback */ }
-    }
+    const parsed: Results | null = raw ? (() => { try { return JSON.parse(raw); } catch { return null; } })() : null;
+
+    const resume = parsed?.resume || DEMO_RESUME;
+    const coverLetter = parsed?.coverLetter || DEMO_COVER_LETTER;
+
+    setResults(parsed || { resume, coverLetter, atsReport: DEMO_ATS, redlineChanges: DEMO_REDLINE });
+    setVersions([{ label: "v1 — Original", resume, coverLetter }]);
+    setCurrentVersion(0);
   }, []);
 
   // Current version content
-  const currentResume = versions[currentVersion]?.resume || results?.resume || "";
-  const currentCoverLetter = versions[currentVersion]?.coverLetter || results?.coverLetter || "";
+  const currentResume = versions[currentVersion]?.resume || DEMO_RESUME;
+  const currentCoverLetter = versions[currentVersion]?.coverLetter || DEMO_COVER_LETTER;
   const activeContent = activeDoc === "resume" ? currentResume : activeDoc === "cover" ? currentCoverLetter : "";
   const atsReport = results?.atsReport;
   const redlineChanges = results?.redlineChanges;
@@ -149,7 +229,7 @@ export default function ResultsPage() {
   };
 
   const handleRefine = async () => {
-    if (!refineInput.trim() || refining || !activeContent) return;
+    if (!refineInput.trim() || refining) return;
     setRefining(true);
     setRefineError(null);
     try {
@@ -329,9 +409,9 @@ export default function ResultsPage() {
                 {activeDoc === "ats" ? (
                   <ATSReport data={atsReport} />
                 ) : activeDoc === "cover" ? (
-                  <DocumentPreview content={currentCoverLetter} title="Cover Letter" empty="Cover letter will appear here after analysis." />
+                  <DocumentPreview content={currentCoverLetter} />
                 ) : (
-                  <DocumentPreview content={currentResume} title="Resume" empty="Resume will appear here after analysis." />
+                  <DocumentPreview content={currentResume} />
                 )}
               </>
             ) : (
@@ -406,7 +486,7 @@ export default function ResultsPage() {
                 <button
                   key={action.type}
                   onClick={() => handleExport(action.type)}
-                  disabled={!activeContent && action.type !== "email"}
+                  disabled={false}
                   className={`w-full flex items-center justify-between px-3 py-3 text-left transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                     action.primary
                       ? "bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B]"
@@ -511,17 +591,7 @@ export default function ResultsPage() {
 }
 
 // ─── Document Preview ─────────────────────────────────────────────────────────
-function DocumentPreview({ content, title, empty }: { content: string; title: string; empty: string }) {
-  if (!content) {
-    return (
-      <div className="max-w-2xl mx-auto bg-[#152338] border border-[#2A3F5F] p-10 text-center">
-        <div className="text-[#6B7280] text-sm">{empty}</div>
-        <Link href="/intake" className="mt-4 inline-block text-[#C5933A] text-xs hover:underline">
-          Start a new analysis →
-        </Link>
-      </div>
-    );
-  }
+function DocumentPreview({ content }: { content: string }) {
   return (
     <div className="max-w-2xl mx-auto bg-[#F9F7F3] p-10 shadow-2xl">
       <pre className="text-[#1A1A2E] text-xs leading-relaxed font-mono whitespace-pre-wrap">{content}</pre>
