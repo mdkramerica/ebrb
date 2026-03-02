@@ -2,9 +2,31 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Download, FileText, Mail, Copy, CheckCircle, ChevronRight, BarChart3, ArrowRight } from "lucide-react";
+import { FileText, Mail, Copy, CheckCircle, ChevronRight, BarChart3 } from "lucide-react";
 
-// Demo content — always available
+// ---------- Types ----------
+interface AtsKeyword {
+  label: string;
+  before: boolean;
+  after: boolean;
+  note: string;
+}
+
+interface AtsReport {
+  beforeScore: number;
+  afterScore: number;
+  keywords: AtsKeyword[];
+  microAdjustments?: string[];
+  finalAssessment: string;
+}
+
+interface Results {
+  resume: string;
+  coverLetter: string;
+  atsReport: AtsReport | string;
+}
+
+// ---------- Demo fallbacks ----------
 const DEMO_RESUME = `ALEX MORGAN, MBA — Supply Chain Executive
 Chicago, Illinois | alex.morgan@email.com | (312) 555-0192
 
@@ -53,41 +75,151 @@ I would welcome the opportunity to discuss how my experience aligns with your pr
 Sincerely,
 Alex Morgan, MBA`;
 
+const DEMO_ATS: AtsReport = {
+  beforeScore: 79,
+  afterScore: 94,
+  keywords: [
+    { label: "Supply chain strategy", before: true, after: true, note: "Strong" },
+    { label: "Cross-functional leadership", before: true, after: true, note: "Strong" },
+    { label: "Regulatory compliance", before: false, after: true, note: "Added" },
+    { label: "ERP implementation", before: true, after: true, note: "Strong" },
+    { label: "Vendor management", before: false, after: true, note: "Added" },
+    { label: "Team leadership 50+", before: false, after: true, note: "Added" },
+  ],
+  finalAssessment: "Highly Competitive",
+};
+
+// ---------- Helpers ----------
+
+function formatAtsText(ats: AtsReport): string {
+  let text = `ATS Keyword Alignment Report\n\n`;
+  text += `Before Score: ${ats.beforeScore}%\nAfter Score: ${ats.afterScore}%\n\n`;
+  text += `Keywords:\n`;
+  for (const kw of ats.keywords) {
+    const before = kw.before ? "✓" : "✗";
+    const after = kw.after ? "✓" : "✗";
+    text += `  ${kw.label}: ${before} → ${after} (${kw.note})\n`;
+  }
+  if (ats.microAdjustments?.length) {
+    text += `\nMicro-Adjustments:\n`;
+    for (const adj of ats.microAdjustments) {
+      text += `  • ${adj}\n`;
+    }
+  }
+  text += `\nOverall Match: ${ats.beforeScore}% → ${ats.afterScore}% (${ats.finalAssessment})`;
+  return text;
+}
+
+function parseAtsReport(raw: AtsReport | string): AtsReport {
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as AtsReport;
+    } catch {
+      return DEMO_ATS;
+    }
+  }
+  return raw;
+}
+
+function getActiveText(doc: "resume" | "cover" | "ats", resume: string, coverLetter: string, ats: AtsReport): string {
+  if (doc === "resume") return resume;
+  if (doc === "cover") return coverLetter;
+  return formatAtsText(ats);
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ---------- Component ----------
+
 export default function ResultsPage() {
   const [activeDoc, setActiveDoc] = useState<"resume" | "cover" | "ats">("resume");
   const [copied, setCopied] = useState(false);
+  const [resume, setResume] = useState(DEMO_RESUME);
+  const [coverLetter, setCoverLetter] = useState(DEMO_COVER);
+  const [atsReport, setAtsReport] = useState<AtsReport>(DEMO_ATS);
+  const [isDemo, setIsDemo] = useState(true);
+
+  // Load real results from sessionStorage on mount
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("ebrb_results");
+      if (!raw) return;
+      const data: Results = JSON.parse(raw);
+      if (data.resume) {
+        setResume(data.resume);
+        setIsDemo(false);
+      }
+      if (data.coverLetter) {
+        setCoverLetter(data.coverLetter);
+      }
+      if (data.atsReport) {
+        setAtsReport(parseAtsReport(data.atsReport));
+      }
+    } catch (e) {
+      console.error("Failed to load results from session:", e);
+    }
+  }, []);
 
   const handleCopy = () => {
-    const text = activeDoc === "resume" ? DEMO_RESUME : activeDoc === "cover" ? DEMO_COVER : "ATS Report";
+    const text = getActiveText(activeDoc, resume, coverLetter, atsReport);
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = (format: "pdf" | "docx" | "txt") => {
-    const text = activeDoc === "resume" ? DEMO_RESUME : DEMO_COVER;
-    const filename = `ebrb-${activeDoc}`;
-    
+  const handleDownload = async (format: "pdf" | "docx" | "txt") => {
+    const text = getActiveText(activeDoc, resume, coverLetter, atsReport);
+    const label = activeDoc === "resume" ? "resume" : activeDoc === "cover" ? "cover-letter" : "ats-report";
+    const filename = `ebrb-${label}`;
+
     if (format === "txt") {
-      const blob = new Blob([text], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${filename}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadBlob(new Blob([text], { type: "text/plain" }), `${filename}.txt`);
     } else if (format === "pdf") {
-      alert("PDF download: Open print dialog to save as PDF");
-      window.print();
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ unit: "pt", format: "letter" });
+      const margin = 50;
+      const pageWidth = doc.internal.pageSize.getWidth() - margin * 2;
+      const lineHeight = 14;
+      doc.setFont("courier", "normal");
+      doc.setFontSize(10);
+
+      const lines = doc.splitTextToSize(text, pageWidth) as string[];
+      let y = margin;
+      const pageHeight = doc.internal.pageSize.getHeight() - margin;
+
+      for (const line of lines) {
+        if (y + lineHeight > pageHeight) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(line, margin, y);
+        y += lineHeight;
+      }
+
+      doc.save(`${filename}.pdf`);
     } else if (format === "docx") {
-      const html = `<html><head><meta charset="utf-8"><title>${filename}</title></head><body><pre>${text}</pre></body></html>`;
-      const blob = new Blob([html], { type: "application/msword" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${filename}.doc`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const { Document, Packer, Paragraph, TextRun } = await import("docx");
+      const paragraphs = text.split("\n").map(
+        (line) =>
+          new Paragraph({
+            children: [new TextRun({ text: line, font: "Calibri", size: 22 })],
+            spacing: { after: 80 },
+          })
+      );
+      const docFile = new Document({
+        sections: [{ children: paragraphs }],
+      });
+      const blob = await Packer.toBlob(docFile);
+      downloadBlob(blob, `${filename}.docx`);
     }
   };
 
@@ -103,7 +235,9 @@ export default function ResultsPage() {
         </Link>
         <div className="flex items-center gap-2">
           <CheckCircle size={14} className="text-[#3D8B5E]" />
-          <span className="text-[#3D8B5E] text-sm">Materials ready</span>
+          <span className="text-[#3D8B5E] text-sm">
+            {isDemo ? "Demo materials" : "Materials ready"}
+          </span>
         </div>
       </div>
 
@@ -130,7 +264,11 @@ export default function ResultsPage() {
                   {doc === "resume" ? "Resume" : doc === "cover" ? "Cover Letter" : "ATS Report"}
                 </div>
                 <div className="text-xs text-[#6B7280]">
-                  {doc === "resume" ? "Final version" : doc === "cover" ? "Balanced tone" : "79% → 94%"}
+                  {doc === "resume"
+                    ? "Final version"
+                    : doc === "cover"
+                    ? "Balanced tone"
+                    : `${atsReport.beforeScore}% → ${atsReport.afterScore}%`}
                 </div>
               </div>
             </button>
@@ -155,9 +293,59 @@ export default function ResultsPage() {
 
           <div className="flex-1 overflow-auto p-6 bg-[#0A1421]">
             <div className="max-w-2xl mx-auto bg-[#F9F7F3] p-10 shadow-2xl">
-              <pre className="text-[#1A1A2E] text-xs leading-relaxed font-mono whitespace-pre-wrap">
-                {activeDoc === "resume" ? DEMO_RESUME : activeDoc === "cover" ? DEMO_COVER : "ATS Keyword Analysis\n\nSupply chain strategy: ✓ Strong\nCross-functional leadership: ✓ Strong\nRegulatory compliance: ✓ Added\nERP implementation: ✓ Strong\nVendor management: ✓ Added\nTeam leadership 50+: ✓ Added\n\nOverall Match: 79% → 94% (Highly Competitive)"}
-              </pre>
+              {activeDoc === "ats" ? (
+                <div className="text-[#1A1A2E] text-xs leading-relaxed">
+                  <h2 className="text-base font-bold mb-4">ATS Keyword Alignment Report</h2>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-red-600">{atsReport.beforeScore}%</div>
+                      <div className="text-[10px] text-[#6B7280] uppercase">Before</div>
+                    </div>
+                    <div className="text-lg text-[#6B7280]">→</div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-700">{atsReport.afterScore}%</div>
+                      <div className="text-[10px] text-[#6B7280] uppercase">After</div>
+                    </div>
+                  </div>
+                  <table className="w-full text-xs border-collapse mb-4">
+                    <thead>
+                      <tr className="border-b border-[#E5E7EB]">
+                        <th className="text-left py-2 font-semibold">Keyword</th>
+                        <th className="text-center py-2 font-semibold">Before</th>
+                        <th className="text-center py-2 font-semibold">After</th>
+                        <th className="text-left py-2 font-semibold">Note</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {atsReport.keywords.map((kw, i) => (
+                        <tr key={i} className="border-b border-[#F3F4F6]">
+                          <td className="py-1.5">{kw.label}</td>
+                          <td className="text-center">{kw.before ? "✓" : "✗"}</td>
+                          <td className="text-center text-green-700">{kw.after ? "✓" : "✗"}</td>
+                          <td className="text-[#6B7280]">{kw.note}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {atsReport.microAdjustments && atsReport.microAdjustments.length > 0 && (
+                    <div className="mb-4">
+                      <div className="font-semibold mb-1">Micro-Adjustments</div>
+                      <ul className="list-disc list-inside space-y-0.5 text-[#4B5563]">
+                        {atsReport.microAdjustments.map((adj, i) => (
+                          <li key={i}>{adj}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="pt-3 border-t border-[#E5E7EB] font-semibold">
+                    Overall: {atsReport.beforeScore}% → {atsReport.afterScore}% ({atsReport.finalAssessment})
+                  </div>
+                </div>
+              ) : (
+                <pre className="text-[#1A1A2E] text-xs leading-relaxed font-mono whitespace-pre-wrap">
+                  {activeDoc === "resume" ? resume : coverLetter}
+                </pre>
+              )}
             </div>
           </div>
         </div>
