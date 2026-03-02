@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FileText, Mail, Copy, CheckCircle, ChevronRight, BarChart3 } from "lucide-react";
+import { FileText, Mail, Copy, CheckCircle, ChevronRight, BarChart3, Lock } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { Nav } from "@/components/Nav";
 
 // ---------- Types ----------
 interface AtsKeyword {
@@ -21,6 +23,7 @@ interface AtsReport {
 }
 
 interface Results {
+  sessionToken?: string;
   resume: string;
   coverLetter: string;
   atsReport: AtsReport | string;
@@ -141,6 +144,7 @@ function downloadBlob(blob: Blob, filename: string) {
 // ---------- Component ----------
 
 export default function ResultsPage() {
+  const { user, loading: authLoading } = useAuth();
   const [activeDoc, setActiveDoc] = useState<"resume" | "cover" | "ats">("resume");
   const [copied, setCopied] = useState(false);
   const [resume, setResume] = useState(DEMO_RESUME);
@@ -168,6 +172,23 @@ export default function ResultsPage() {
       console.error("Failed to load results from session:", e);
     }
   }, []);
+
+  // Claim anonymous session after login
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const raw = sessionStorage.getItem("ebrb_results");
+      if (!raw) return;
+      const { sessionToken } = JSON.parse(raw);
+      if (sessionToken) {
+        fetch("/api/claim-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionToken }),
+        }).catch(console.error);
+      }
+    } catch {}
+  }, [user]);
 
   const handleCopy = () => {
     const text = getActiveText(activeDoc, resume, coverLetter, atsReport);
@@ -225,21 +246,16 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen bg-[#0E1A2B] flex flex-col">
-      {/* Nav */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A3F5F]">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 border border-[#C5933A] flex items-center justify-center">
-            <span className="text-[#C5933A] text-xs font-semibold">E</span>
+      <Nav
+        rightContent={
+          <div className="flex items-center gap-2">
+            <CheckCircle size={14} className="text-[#3D8B5E]" />
+            <span className="text-[#3D8B5E] text-sm">
+              {isDemo ? "Demo materials" : "Materials ready"}
+            </span>
           </div>
-          <span className="text-[#F9F7F3] text-sm font-medium tracking-wider">EBRB</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <CheckCircle size={14} className="text-[#3D8B5E]" />
-          <span className="text-[#3D8B5E] text-sm">
-            {isDemo ? "Demo materials" : "Materials ready"}
-          </span>
-        </div>
-      </div>
+        }
+      />
 
       {/* Main content */}
       <div className="flex-1 grid lg:grid-cols-[220px_1fr_280px] gap-0 min-h-0">
@@ -276,22 +292,24 @@ export default function ResultsPage() {
         </div>
 
         {/* Center: document preview */}
-        <div className="flex flex-col min-h-0 overflow-hidden">
+        <div className="flex flex-col min-h-0 overflow-hidden relative">
           <div className="flex items-center justify-between px-6 py-3 border-b border-[#2A3F5F] flex-shrink-0">
             <div className="text-sm text-[#F9F7F3]">Preview</div>
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#F9F7F3] transition-colors"
-            >
-              {copied ? (
-                <><CheckCircle size={12} className="text-[#3D8B5E]" /> Copied</>
-              ) : (
-                <><Copy size={12} /> Copy text</>
-              )}
-            </button>
+            {user && (
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#F9F7F3] transition-colors"
+              >
+                {copied ? (
+                  <><CheckCircle size={12} className="text-[#3D8B5E]" /> Copied</>
+                ) : (
+                  <><Copy size={12} /> Copy text</>
+                )}
+              </button>
+            )}
           </div>
 
-          <div className="flex-1 overflow-auto p-6 bg-[#0A1421]">
+          <div className={`flex-1 overflow-auto p-6 bg-[#0A1421] ${!user && !authLoading ? "blur-sm pointer-events-none select-none" : ""}`}>
             <div className="max-w-2xl mx-auto bg-[#F9F7F3] p-10 shadow-2xl">
               {activeDoc === "ats" ? (
                 <div className="text-[#1A1A2E] text-xs leading-relaxed">
@@ -348,6 +366,35 @@ export default function ResultsPage() {
               )}
             </div>
           </div>
+
+          {/* Auth gate overlay */}
+          {!user && !authLoading && (
+            <div className="absolute inset-0 flex items-center justify-center z-10 bg-[#0A1421]/60 backdrop-blur-[2px]">
+              <div className="bg-[#0E1A2B] border border-[#2A3F5F] p-8 max-w-md text-center">
+                <div className="w-12 h-12 border border-[#C5933A] flex items-center justify-center mx-auto mb-4">
+                  <Lock size={20} className="text-[#C5933A]" />
+                </div>
+                <h3 className="font-display text-2xl text-[#F9F7F3] mb-3">
+                  Your materials are ready
+                </h3>
+                <p className="text-[#9CA3AF] text-sm mb-6 leading-relaxed">
+                  Create a free account to view your full resume, cover letter, and ATS report. Download in PDF, Word, or plain text.
+                </p>
+                <Link
+                  href="/signup"
+                  className="block w-full bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold py-3 text-sm transition-colors mb-3"
+                >
+                  Create Free Account
+                </Link>
+                <Link
+                  href="/login"
+                  className="block w-full border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#9CA3AF] hover:text-[#F9F7F3] py-3 text-sm transition-colors"
+                >
+                  Already have an account? Sign in
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: export */}
@@ -357,8 +404,13 @@ export default function ResultsPage() {
             {(["PDF", "Word", "Plain Text"] as const).map((type) => (
               <button
                 key={type}
-                onClick={() => handleDownload(type === "PDF" ? "pdf" : type === "Word" ? "docx" : "txt")}
-                className="w-full flex items-center justify-between px-3 py-3 text-left bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] text-xs font-medium transition-colors"
+                onClick={() => user && handleDownload(type === "PDF" ? "pdf" : type === "Word" ? "docx" : "txt")}
+                disabled={!user}
+                className={`w-full flex items-center justify-between px-3 py-3 text-left text-xs font-medium transition-colors ${
+                  user
+                    ? "bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B]"
+                    : "bg-[#2A3F5F] text-[#6B7280] cursor-not-allowed"
+                }`}
               >
                 <span>Download {type}</span>
                 <ChevronRight size={12} />

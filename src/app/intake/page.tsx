@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Upload, FileText, ChevronDown } from "lucide-react";
+import { Nav } from "@/components/Nav";
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 40 : -40, opacity: 0 }),
@@ -56,16 +57,11 @@ export default function IntakePage() {
 
   return (
     <div className="min-h-screen bg-[#0E1A2B] flex flex-col">
-      {/* Nav */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A3F5F]">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 border border-[#C5933A] flex items-center justify-center">
-            <span className="text-[#C5933A] text-xs font-semibold">E</span>
-          </div>
-          <span className="text-[#F9F7F3] text-sm font-medium tracking-wider">EBRB</span>
-        </Link>
-        <div className="text-[#6B7280] text-sm">Step {step + 1} of {totalSteps}</div>
-      </div>
+      <Nav
+        rightContent={
+          <div className="text-[#6B7280] text-sm">Step {step + 1} of {totalSteps}</div>
+        }
+      />
 
       {/* Progress bar */}
       <div className="h-px bg-[#2A3F5F] relative">

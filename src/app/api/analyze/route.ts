@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { getSupabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { createSupabaseServer } from '@/lib/supabase/server';
 import { SYSTEM_PROMPT, buildUserPrompt } from '@/lib/prompt';
 import { createHash } from 'crypto';
 
@@ -32,19 +33,30 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const ipHash = createHash('sha256').update(ip).digest('hex').slice(0, 16);
 
+    // Check for authenticated user
+    let userId: string | null = null;
+    try {
+      const supabase = await createSupabaseServer();
+      const { data: { user } } = await supabase.auth.getUser();
+      userId = user?.id ?? null;
+    } catch {}
+
     // Store session in Supabase
     const token = sessionToken || crypto.randomUUID();
+    const sessionData = {
+      session_token: token,
+      job_posting: jobPosting,
+      resume: resume,
+      tone: tone || 'balanced',
+      context: context || 'external',
+      output_preference: output || 'both',
+      ip_hash: ipHash,
+      user_id: userId,
+    };
+
     const { data: session, error: sessionError } = await getSupabaseAdmin()
       .from('sessions')
-      .upsert({
-        session_token: token,
-        job_posting: jobPosting,
-        resume: resume,
-        tone: tone || 'balanced',
-        context: context || 'external',
-        output_preference: output || 'both',
-        ip_hash: ipHash,
-      }, { onConflict: 'session_token' })
+      .upsert(sessionData, { onConflict: 'session_token' })
       .select()
       .single();
 
