@@ -56,7 +56,6 @@ const EXTENDED_DOC_TYPES = [
   "speaking_intro",
 ] as const;
 
-type ExtendedDocType = typeof EXTENDED_DOC_TYPES[number];
 
 // Icons for each doc type
 function DocIcon({ docType, size = 14 }: { docType: string; size?: number }) {

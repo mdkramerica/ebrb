@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { ArrowRight, ArrowLeft, Upload, FileText, MessageSquare } from "lucide-react";
 import { Nav } from "@/components/Nav";
 

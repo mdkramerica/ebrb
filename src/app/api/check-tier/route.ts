@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { getTierFlags, getAnalysisLimit, TIERS } from '@/lib/tiers';
+import { getTierFlags, getAnalysisLimit } from '@/lib/tiers';
 import type { Tier } from '@/lib/tiers';
 
 export async function GET() {

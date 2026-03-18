@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { createSupabaseServer } from '@/lib/supabase/server';
-import { getTierFlags } from '@/lib/tiers';
 import { DOC_TYPE_TIER } from '@/lib/tiers';
 import type { Tier } from '@/lib/tiers';
 

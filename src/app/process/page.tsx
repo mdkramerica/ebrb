@@ -59,8 +59,6 @@ export default function ProcessPage() {
 
   // Animate steps (visual progress — independent of API)
   useEffect(() => {
-    let stepIndex = 0;
-
     const runStep = (i: number) => {
       if (i >= ANALYSIS_STEPS.length) return;
       setStatuses((prev) => ({ ...prev, [ANALYSIS_STEPS[i].id]: "running" }));
@@ -80,6 +78,7 @@ export default function ProcessPage() {
     const form = JSON.parse(sessionStorage.getItem("ebrb_form") || "{}");
 
     if (!form.jobPosting || !form.resume) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError("Missing input data. Please go back and try again.");
       return;
     }
@@ -107,6 +106,7 @@ export default function ProcessPage() {
   // Navigate when BOTH animation done AND API done
   useEffect(() => {
     if (apiDone && completedCount === ANALYSIS_STEPS.length) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDone(true);
       const t = setTimeout(() => router.push("/results"), 1000);
       return () => clearTimeout(t);
