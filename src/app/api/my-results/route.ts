@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     // Get a specific session or the most recent one
     const query = getSupabaseAdmin()
       .from('sessions')
-      .select('id, session_token')
+      .select('id, session_token, intent, completion_status')
       .eq('user_id', user.id);
 
     if (sessionId) {
@@ -32,18 +32,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'No results found' }, { status: 404 });
     }
 
-    // Get all documents for that session
+    // Get ALL documents for that session (no doc_type filter — supports all V2 types)
     const { data: docs, error: docsError } = await getSupabaseAdmin()
       .from('documents')
-      .select('doc_type, content')
+      .select('id, doc_type, content, version, created_at')
       .eq('session_id', session.id)
-      .order('version', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (docsError || !docs?.length) {
       return NextResponse.json({ error: 'No documents found' }, { status: 404 });
     }
 
-    // Build response matching the shape the results page expects
+    // Build the legacy response shape (for backward compatibility with results page)
     const resume = docs.find(d => d.doc_type === 'resume')?.content || '';
     const coverLetter = docs.find(d => d.doc_type === 'cover_letter')?.content || '';
     const atsRaw = docs.find(d => d.doc_type === 'ats_report')?.content || '{}';
@@ -55,11 +55,25 @@ export async function GET(request: Request) {
       atsReport = atsRaw;
     }
 
+    // All documents as a flat array for the dynamic sidebar
+    const allDocs = docs.map(d => ({
+      id: d.id,
+      docType: d.doc_type,
+      hasContent: Boolean(d.content),
+      createdAt: d.created_at,
+    }));
+
     return NextResponse.json({
       sessionToken: session.session_token,
+      sessionId: session.id,
+      intent: session.intent,
+      completionStatus: session.completion_status,
+      // Legacy fields preserved for backward compatibility
       resume,
       coverLetter,
       atsReport,
+      // New: full document index
+      documents: allDocs,
     });
   } catch (error) {
     console.error('my-results error:', error);

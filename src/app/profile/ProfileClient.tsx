@@ -3,8 +3,12 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { User, LogOut, FileText, Clock, ChevronRight } from "lucide-react";
+import {
+  User, LogOut, FileText, Clock, ChevronRight,
+  BookOpen, MessageSquare, Copy, CheckCircle,
+} from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { useState } from "react";
 
 interface Profile {
   id: string;
@@ -20,6 +24,23 @@ interface Session {
   job_posting: string;
   tone: string;
   context: string;
+  intent?: string | null;
+}
+
+interface Achievement {
+  id: string;
+  content: string;
+  role_context?: string | null;
+  tags?: string[] | null;
+  created_at: string;
+}
+
+interface Conversation {
+  id: string;
+  intent: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const TIER_STYLES = {
@@ -28,24 +49,55 @@ const TIER_STYLES = {
   unlimited: "bg-[#C5933A] text-[#0E1A2B]",
 } as const;
 
+const INTENT_LABELS: Record<string, string> = {
+  traction_diagnostic: "Traction Diagnostic",
+  differentiation_discovery: "Differentiation",
+  positioning_discovery: "Positioning",
+  direct_improvement: "Resume Build",
+  career_positioning: "Career Positioning",
+  interview_prep: "Interview Prep",
+  general_question: "Guidance",
+};
+
+const INTENT_COLORS: Record<string, string> = {
+  traction_diagnostic: "text-amber-400 bg-amber-400/10 border-amber-400/30",
+  differentiation_discovery: "text-blue-400 bg-blue-400/10 border-blue-400/30",
+  positioning_discovery: "text-purple-400 bg-purple-400/10 border-purple-400/30",
+  direct_improvement: "text-green-400 bg-green-400/10 border-green-400/30",
+  career_positioning: "text-sky-400 bg-sky-400/10 border-sky-400/30",
+  interview_prep: "text-rose-400 bg-rose-400/10 border-rose-400/30",
+};
+
 export default function ProfileClient({
   user,
   profile,
   sessions,
+  achievements,
+  conversations,
 }: {
   user: SupabaseUser;
   profile: Profile | null;
   sessions: Session[];
+  achievements: Achievement[];
+  conversations: Conversation[];
 }) {
   const router = useRouter();
   const tier = profile?.tier || "free";
   const displayName = profile?.full_name || user.email?.split("@")[0] || "User";
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"history" | "achievements" | "conversations">("history");
 
   const handleSignOut = async () => {
     const supabase = createSupabaseBrowser();
     await supabase.auth.signOut();
     router.push("/");
     router.refresh();
+  };
+
+  const copyAchievement = (id: string, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (
@@ -71,7 +123,7 @@ export default function ProfileClient({
       </div>
 
       {/* Content */}
-      <div className="flex-1 max-w-4xl mx-auto w-full px-6 py-10">
+      <div className="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
         <div className="flex items-center gap-3 mb-8">
           <div className="h-px w-6 bg-[#C5933A]" />
           <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">
@@ -79,7 +131,7 @@ export default function ProfileClient({
           </span>
         </div>
 
-        <div className="grid md:grid-cols-[1fr_1.5fr] gap-8">
+        <div className="grid md:grid-cols-[1fr_1.8fr] gap-8">
           {/* Left: profile card */}
           <div className="space-y-6">
             <div className="bg-[#152338] border border-[#2A3F5F] p-6">
@@ -104,6 +156,22 @@ export default function ProfileClient({
               </div>
             </div>
 
+            {/* Quick links */}
+            <div className="space-y-2">
+              <Link
+                href="/intake"
+                className="block w-full text-center text-xs text-[#C5933A] border border-[#C5933A]/30 py-2.5 hover:bg-[#C5933A]/10 transition-colors"
+              >
+                Start new analysis →
+              </Link>
+              <Link
+                href="/chat"
+                className="block w-full text-center text-xs text-[#9CA3AF] border border-[#2A3F5F] py-2.5 hover:bg-[#152338]/50 transition-colors"
+              >
+                Start guided session →
+              </Link>
+            </div>
+
             {/* Upgrade stub */}
             {tier === "free" && (
               <div className="bg-[#152338] border border-[#2A3F5F] p-6">
@@ -111,7 +179,7 @@ export default function ProfileClient({
                   Upgrade your plan
                 </div>
                 <p className="text-[#9CA3AF] text-sm mb-4 leading-relaxed">
-                  Get unlimited analyses, cover letters, and priority processing.
+                  Get executive bio, LinkedIn summary, interview stories, guided sessions, and 5 analyses per month.
                 </p>
                 <button
                   disabled
@@ -123,73 +191,185 @@ export default function ProfileClient({
             )}
           </div>
 
-          {/* Right: analysis history */}
+          {/* Right: tabbed content */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Clock size={14} className="text-[#6B7280]" />
-              <span className="text-xs text-[#6B7280] font-medium tracking-wider uppercase">
-                Analysis History
-              </span>
+            {/* Tab bar */}
+            <div className="flex border-b border-[#2A3F5F] mb-6">
+              {[
+                { key: "history", label: "Analysis History", icon: Clock },
+                { key: "achievements", label: `Achievement Library${achievements.length > 0 ? ` (${achievements.length})` : ""}`, icon: BookOpen },
+                { key: "conversations", label: `Sessions${conversations.length > 0 ? ` (${conversations.length})` : ""}`, icon: MessageSquare },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                  className={`flex items-center gap-1.5 px-4 py-3 text-xs font-medium border-b-2 -mb-px transition-colors ${
+                    activeTab === tab.key
+                      ? "border-[#C5933A] text-[#C5933A]"
+                      : "border-transparent text-[#6B7280] hover:text-[#9CA3AF]"
+                  }`}
+                >
+                  <tab.icon size={12} />
+                  {tab.label}
+                </button>
+              ))}
             </div>
 
-            {sessions.length === 0 ? (
-              <div className="bg-[#152338] border border-[#2A3F5F] p-8 text-center">
-                <FileText size={24} className="text-[#2A3F5F] mx-auto mb-3" />
-                <p className="text-[#6B7280] text-sm mb-4">No analyses yet</p>
-                <Link
-                  href="/intake"
-                  className="inline-block bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-6 py-2.5 text-sm transition-colors"
-                >
-                  Start your first analysis
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {sessions.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/results?session=${s.id}`}
-                    className="block bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#C5933A]/30 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[#F9F7F3] text-sm truncate">
-                          {s.job_posting.slice(0, 100)}
-                          {s.job_posting.length > 100 ? "..." : ""}
-                        </p>
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className="text-[10px] text-[#6B7280] uppercase tracking-wider">
-                            {s.tone}
-                          </span>
-                          <span className="text-[#2A3F5F]">|</span>
-                          <span className="text-[10px] text-[#6B7280] uppercase tracking-wider">
-                            {s.context}
-                          </span>
+            {/* Analysis History */}
+            {activeTab === "history" && (
+              <div>
+                {sessions.length === 0 ? (
+                  <div className="bg-[#152338] border border-[#2A3F5F] p-8 text-center">
+                    <FileText size={24} className="text-[#2A3F5F] mx-auto mb-3" />
+                    <p className="text-[#6B7280] text-sm mb-4">No analyses yet</p>
+                    <Link
+                      href="/intake"
+                      className="inline-block bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-6 py-2.5 text-sm transition-colors"
+                    >
+                      Start your first analysis
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {sessions.map((s) => (
+                      <Link
+                        key={s.id}
+                        href={`/results?session=${s.id}`}
+                        className="block bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#C5933A]/30 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[#F9F7F3] text-sm truncate">
+                              {s.job_posting.slice(0, 100)}
+                              {s.job_posting.length > 100 ? "..." : ""}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              {s.intent && INTENT_LABELS[s.intent] && (
+                                <span className={`text-[10px] font-medium px-2 py-0.5 border rounded-sm ${INTENT_COLORS[s.intent] || "text-[#6B7280] border-[#2A3F5F]"}`}>
+                                  {INTENT_LABELS[s.intent]}
+                                </span>
+                              )}
+                              <span className="text-[10px] text-[#6B7280] uppercase tracking-wider">{s.tone}</span>
+                              <span className="text-[#2A3F5F]">|</span>
+                              <span className="text-[10px] text-[#6B7280] uppercase tracking-wider">{s.context}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-[10px] text-[#6B7280] whitespace-nowrap">
+                              {new Date(s.created_at).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </div>
+                            <ChevronRight size={12} className="text-[#6B7280]" />
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-[10px] text-[#6B7280] whitespace-nowrap">
-                          {new Date(s.created_at).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </div>
-                        <ChevronRight size={12} className="text-[#6B7280]" />
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            <div className="mt-4">
-              <Link
-                href="/intake"
-                className="block w-full text-center text-xs text-[#C5933A] border border-[#C5933A]/30 py-2.5 hover:bg-[#C5933A]/10 transition-colors"
-              >
-                Start new analysis →
-              </Link>
-            </div>
+            {/* Achievement Library */}
+            {activeTab === "achievements" && (
+              <div>
+                {achievements.length === 0 ? (
+                  <div className="bg-[#152338] border border-[#2A3F5F] p-8 text-center">
+                    <BookOpen size={24} className="text-[#2A3F5F] mx-auto mb-3" />
+                    <p className="text-[#6B7280] text-sm mb-2">No saved achievements yet</p>
+                    <p className="text-[#4A5568] text-xs leading-relaxed max-w-sm mx-auto">
+                      Strong bullets that don&apos;t fit the primary resume are automatically saved here. Run an analysis to build your library.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {achievements.map(ach => (
+                      <div
+                        key={ach.id}
+                        className="bg-[#152338] border border-[#2A3F5F] p-4 group"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <p className="text-[#F9F7F3] text-sm leading-relaxed flex-1">{ach.content}</p>
+                          <button
+                            onClick={() => copyAchievement(ach.id, ach.content)}
+                            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-[#6B7280] hover:text-[#C5933A]"
+                          >
+                            {copiedId === ach.id ? (
+                              <CheckCircle size={14} className="text-[#3D8B5E]" />
+                            ) : (
+                              <Copy size={14} />
+                            )}
+                          </button>
+                        </div>
+                        {(ach.role_context || (ach.tags && ach.tags.length > 0)) && (
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            {ach.role_context && (
+                              <span className="text-[10px] text-[#6B7280]">{ach.role_context}</span>
+                            )}
+                            {ach.tags?.map(tag => (
+                              <span key={tag} className="text-[10px] text-[#4A5568] border border-[#2A3F5F] px-1.5 py-0.5 rounded-sm">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Guided Conversations */}
+            {activeTab === "conversations" && (
+              <div>
+                {conversations.length === 0 ? (
+                  <div className="bg-[#152338] border border-[#2A3F5F] p-8 text-center">
+                    <MessageSquare size={24} className="text-[#2A3F5F] mx-auto mb-3" />
+                    <p className="text-[#6B7280] text-sm mb-4">No guided sessions yet</p>
+                    <Link
+                      href="/chat"
+                      className="inline-block bg-[#152338] hover:bg-[#1E3049] border border-[#C5933A]/30 text-[#C5933A] font-medium px-6 py-2.5 text-sm transition-colors"
+                    >
+                      Start a guided session
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {conversations.map(conv => (
+                      <Link
+                        key={conv.id}
+                        href={`/chat?conversation=${conv.id}`}
+                        className="block bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#C5933A]/30 transition-colors"
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <MessageSquare size={14} className="text-[#6B7280] flex-shrink-0" />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[#F9F7F3] text-sm">
+                                  {INTENT_LABELS[conv.intent || ""] || "Guided Session"}
+                                </span>
+                                {conv.intent && INTENT_COLORS[conv.intent] && (
+                                  <span className={`text-[10px] font-medium px-1.5 py-0.5 border rounded-sm ${INTENT_COLORS[conv.intent]}`}>
+                                    {INTENT_LABELS[conv.intent]}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[10px] text-[#6B7280] mt-0.5">
+                                Last active {new Date(conv.updated_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              </div>
+                            </div>
+                          </div>
+                          <ChevronRight size={12} className="text-[#6B7280]" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

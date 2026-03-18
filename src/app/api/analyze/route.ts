@@ -3,6 +3,8 @@ import OpenAI from 'openai';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { createSupabaseServer } from '@/lib/supabase/server';
 import { SYSTEM_PROMPT, buildUserPrompt } from '@/lib/prompt';
+import { getAnalysisLimit } from '@/lib/tiers';
+import type { Tier } from '@/lib/tiers';
 import { createHash } from 'crypto';
 
 const openai = new OpenAI({
@@ -41,6 +43,41 @@ export async function POST(req: NextRequest) {
       userId = user?.id ?? null;
     } catch {}
 
+    // Tier-based usage check (authenticated users only)
+    if (userId) {
+      const { data: profile } = await getSupabaseAdmin()
+        .from('profiles')
+        .select('tier')
+        .eq('id', userId)
+        .single();
+
+      const tier: Tier = (profile?.tier as Tier) || 'free';
+      const limit = getAnalysisLimit(tier);
+
+      if (limit !== Infinity) {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const { count } = await getSupabaseAdmin()
+          .from('sessions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .gte('created_at', startOfMonth.toISOString());
+
+        if ((count ?? 0) >= limit) {
+          return NextResponse.json(
+            {
+              error: `You've reached your ${limit} analysis limit for this month. Upgrade to run more analyses.`,
+              limitReached: true,
+              tier,
+            },
+            { status: 402 }
+          );
+        }
+      }
+    }
+
     // Store session in Supabase
     const token = sessionToken || crypto.randomUUID();
     const sessionData = {
@@ -52,6 +89,7 @@ export async function POST(req: NextRequest) {
       output_preference: output || 'both',
       ip_hash: ipHash,
       user_id: userId,
+      // New V2 fields — populated after AI response
     };
 
     const { data: session, error: sessionError } = await getSupabaseAdmin()
@@ -85,7 +123,7 @@ export async function POST(req: NextRequest) {
       ],
       response_format: { type: 'json_object' },
       temperature: 0.3, // Lower temp = more consistent, professional output
-      max_tokens: 8000,
+      max_tokens: 12000, // Increased to support richer five-layer output
     });
 
     const rawOutput = completion.choices[0]?.message?.content;
@@ -100,20 +138,57 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to parse AI output' }, { status: 500 });
     }
 
+    // Update session with V2 fields from AI output
+    if (sessionId && (parsed.intentDetected || parsed.completionStatus)) {
+      await getSupabaseAdmin()
+        .from('sessions')
+        .update({
+          intent: parsed.intentDetected ?? 'direct_improvement',
+          completion_status: parsed.completionStatus ?? null,
+        })
+        .eq('id', sessionId);
+    }
+
     // Store generated documents in Supabase
     if (sessionId) {
-      const docs = [
-        { session_id: sessionId, doc_type: 'resume' as const, content: parsed.resume, version: 1 },
-        { session_id: sessionId, doc_type: 'cover_letter' as const, content: parsed.coverLetter, version: 1 },
-        { session_id: sessionId, doc_type: 'ats_report' as const, content: JSON.stringify(parsed.atsReport), version: 1 },
-      ];
+      const docs = [];
 
-      const { error: docsError } = await getSupabaseAdmin()
-        .from('documents')
-        .insert(docs);
+      if (parsed.resume) {
+        docs.push({ session_id: sessionId, doc_type: 'resume', content: parsed.resume, version: 1 });
+      }
+      if (parsed.coverLetter) {
+        docs.push({ session_id: sessionId, doc_type: 'cover_letter', content: parsed.coverLetter, version: 1 });
+      }
+      if (parsed.atsReport) {
+        docs.push({ session_id: sessionId, doc_type: 'ats_report', content: JSON.stringify(parsed.atsReport), version: 1 });
+      }
 
-      if (docsError) {
-        console.error('Document storage error:', docsError);
+      if (docs.length > 0) {
+        const { error: docsError } = await getSupabaseAdmin()
+          .from('documents')
+          .insert(docs);
+
+        if (docsError) {
+          console.error('Document storage error:', docsError);
+        }
+      }
+
+      // Store modular achievements if any were generated
+      if (parsed.modularAchievements?.length > 0 && userId) {
+        const achievements = parsed.modularAchievements.map((content: string) => ({
+          session_id: sessionId,
+          user_id: userId,
+          content,
+          tags: [],
+        }));
+
+        const { error: achievementsError } = await getSupabaseAdmin()
+          .from('modular_achievements')
+          .insert(achievements);
+
+        if (achievementsError) {
+          console.error('Modular achievements storage error:', achievementsError);
+        }
       }
     }
 
@@ -126,6 +201,10 @@ export async function POST(req: NextRequest) {
       coverLetter: parsed.coverLetter,
       atsReport: parsed.atsReport,
       redlineChanges: parsed.redlineChanges,
+      // V2 new fields
+      modularAchievements: parsed.modularAchievements ?? [],
+      intentDetected: parsed.intentDetected ?? 'direct_improvement',
+      completionStatus: parsed.completionStatus ?? null,
       usage: {
         promptTokens: completion.usage?.prompt_tokens,
         completionTokens: completion.usage?.completion_tokens,

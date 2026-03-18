@@ -1,4 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import ProfileClient from "./ProfileClient";
 
@@ -10,24 +11,45 @@ export default async function ProfilePage() {
 
   if (!user) redirect("/login?redirect=/profile");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const [profileResult, sessionsResult, achievementsResult, conversationsResult] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single(),
 
-  const { data: sessions } = await supabase
-    .from("sessions")
-    .select("id, created_at, job_posting, tone, context")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(20);
+    // Include V2 intent field
+    supabase
+      .from("sessions")
+      .select("id, created_at, job_posting, tone, context, intent")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20),
+
+    // Modular achievement library (V2)
+    getSupabaseAdmin()
+      .from("modular_achievements")
+      .select("id, content, role_context, tags, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+
+    // Guided chat sessions (V2)
+    getSupabaseAdmin()
+      .from("conversations")
+      .select("id, intent, status, created_at, updated_at")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false })
+      .limit(10),
+  ]);
 
   return (
     <ProfileClient
       user={user}
-      profile={profile}
-      sessions={sessions || []}
+      profile={profileResult.data}
+      sessions={sessionsResult.data || []}
+      achievements={achievementsResult.data || []}
+      conversations={conversationsResult.data || []}
     />
   );
 }

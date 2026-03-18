@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, Upload, FileText, ChevronDown } from "lucide-react";
+import { ArrowRight, ArrowLeft, Upload, FileText, MessageSquare } from "lucide-react";
 import { Nav } from "@/components/Nav";
 
 const slideVariants = {
@@ -71,6 +71,21 @@ export default function IntakePage() {
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         />
+      </div>
+
+      {/* Mode toggle */}
+      <div className="border-b border-[#2A3F5F]">
+        <div className="max-w-2xl mx-auto px-6 flex">
+          <span className="flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 border-[#C5933A] text-[#C5933A] -mb-px">
+            <FileText size={12} /> Quick Analysis
+          </span>
+          <button
+            onClick={() => router.push("/chat")}
+            className="flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 border-transparent text-[#6B7280] hover:text-[#9CA3AF] transition-colors -mb-px"
+          >
+            <MessageSquare size={12} /> Guided Session
+          </button>
+        </div>
       </div>
 
       {/* Content */}
