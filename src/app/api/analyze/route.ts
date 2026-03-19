@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
 
     // Call OpenAI (non-streaming for reliability, returns structured JSON)
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4.1',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },

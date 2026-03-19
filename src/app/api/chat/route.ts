@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
 
     // Stream response from OpenAI
     const stream = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4.1',
       messages,
       temperature: 0.4,
       max_tokens: 4000,

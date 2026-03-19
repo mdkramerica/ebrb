@@ -36,7 +36,7 @@ Rules:
 - Do not remove content unless explicitly asked to trim/condense`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4.1',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: refinePrompt },

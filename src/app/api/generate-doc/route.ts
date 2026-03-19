@@ -203,7 +203,7 @@ ${resumeContent}
 ${session.job_posting ? `---\n\nORIGINAL JOB POSTING CONTEXT:\n${session.job_posting.slice(0, 1000)}` : ''}`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4.1',
       messages: [
         {
           role: 'system',
