@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { safeRedirect } from '@/lib/safe-redirect'
 
 const PROTECTED_ROUTES = ['/profile', '/chat']
 const AUTH_ROUTES = ['/login', '/signup']
@@ -19,7 +20,7 @@ export async function middleware(request: NextRequest) {
   if (!user && PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    url.searchParams.set('redirect', pathname)
+    url.searchParams.set('redirect', safeRedirect(pathname))
     return NextResponse.redirect(url)
   }
 

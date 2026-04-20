@@ -41,6 +41,8 @@ interface Results {
   intent?: string;
   resume: string;
   coverLetter: string;
+  /** The API returns the parsed object; the field can still be the JSON string
+   * in legacy payloads, so keep the union and normalize via parseAtsReport. */
   atsReport: AtsReport | string;
   documents?: DocIndex[];
 }
@@ -209,76 +211,48 @@ export default function ResultsPage() {
       .catch(() => {});
   }, [user]);
 
-  // Load results
-  useEffect(() => {
-    if (sessionId && user) {
-      fetch(`/api/my-results?sessionId=${sessionId}`)
-        .then(res => res.ok ? res.json() : Promise.reject())
-        .then((data: Results) => {
-          if (data.resume) {
-            setResume(data.resume);
-            setCoverLetter(data.coverLetter || DEMO_COVER);
-            if (data.atsReport) setAtsReport(parseAtsReport(data.atsReport));
-            if (data.sessionId) setCurrentSessionId(data.sessionId);
-            if (data.documents) setExistingDocs(data.documents);
-            setIsDemo(false);
-          }
-        })
-        .catch(() => {});
-      return;
-    }
-
-    let loaded = false;
-
-    try {
-      const raw = localStorage.getItem("ebrb_results");
-      if (raw) {
-        const data: Results = JSON.parse(raw);
-        if (data.resume) {
-          setResume(data.resume);
-          setCoverLetter(data.coverLetter || DEMO_COVER);
-          if (data.atsReport) setAtsReport(parseAtsReport(data.atsReport));
-          if (data.sessionId) setCurrentSessionId(data.sessionId);
-          if (data.documents) setExistingDocs(data.documents);
-          setIsDemo(false);
-          loaded = true;
-        }
-      }
-    } catch {}
-
-    if (!loaded && user) {
-      fetch("/api/my-results")
-        .then(res => res.ok ? res.json() : Promise.reject())
-        .then((data: Results) => {
-          if (data.resume) {
-            setResume(data.resume);
-            setCoverLetter(data.coverLetter || DEMO_COVER);
-            if (data.atsReport) setAtsReport(parseAtsReport(data.atsReport));
-            if (data.sessionId) setCurrentSessionId(data.sessionId);
-            if (data.documents) setExistingDocs(data.documents);
-            setIsDemo(false);
-            localStorage.setItem("ebrb_results", JSON.stringify(data));
-          }
-        })
-        .catch(() => {});
-    }
-  }, [user, sessionId]);
-
-  // Claim anonymous session after login
+  // Load results. Anonymous users see DEMO_* content until they authenticate;
+  // real resume/cover letter text is never persisted client-side.
   useEffect(() => {
     if (!user) return;
+
+    const applyData = (data: Results) => {
+      if (!data.resume) return;
+      setResume(data.resume);
+      setCoverLetter(data.coverLetter || DEMO_COVER);
+      if (data.atsReport) setAtsReport(parseAtsReport(data.atsReport));
+      if (data.sessionId) setCurrentSessionId(data.sessionId);
+      if (data.documents) setExistingDocs(data.documents);
+      setIsDemo(false);
+    };
+
+    const url = sessionId ? `/api/my-results?sessionId=${encodeURIComponent(sessionId)}` : "/api/my-results";
+    fetch(url)
+      .then(res => res.ok ? res.json() : Promise.reject(new Error("Fetch failed")))
+      .then(applyData)
+      .catch(() => {});
+  }, [user, sessionId]);
+
+  // Claim anonymous session after login using only the token kept in sessionStorage.
+  useEffect(() => {
+    if (!user) return;
+    let sessionToken: string | null = null;
     try {
-      const raw = localStorage.getItem("ebrb_results");
-      if (!raw) return;
-      const { sessionToken } = JSON.parse(raw);
-      if (sessionToken) {
-        fetch("/api/claim-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionToken }),
-        }).catch(console.error);
-      }
+      sessionToken = sessionStorage.getItem("ebrb_session_token");
+      // Clean up any legacy localStorage copy with full content.
+      localStorage.removeItem("ebrb_results");
     } catch {}
+
+    if (!sessionToken) return;
+    fetch("/api/claim-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionToken }),
+    })
+      .catch((err) => console.error("claim-session failed", err))
+      .finally(() => {
+        try { sessionStorage.removeItem("ebrb_session_token"); } catch {}
+      });
   }, [user]);
 
   const getActiveText = (): string => {

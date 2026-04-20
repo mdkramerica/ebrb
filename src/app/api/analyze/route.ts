@@ -1,59 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { createSupabaseServer } from '@/lib/supabase/server';
 import { SYSTEM_PROMPT, buildUserPrompt } from '@/lib/prompt';
 import { getAnalysisLimit } from '@/lib/tiers';
 import type { Tier } from '@/lib/tiers';
-import { createHash } from 'crypto';
+import { getOptionalUser, getUserTier } from '@/lib/api/auth';
+import { enforceRateLimit, extractIp, hashIp } from '@/lib/api/rate-limit';
+import { getOpenAI } from '@/lib/api/openai';
+import { handleRouteError, badRequest, paymentRequired } from '@/lib/api/errors';
+import { parseAnalyzeOutput } from '@/lib/api/analyze-schema';
+import { INPUT_LIMITS, requireEnum, requireString } from '@/lib/api/validation';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const TONES = ['concise', 'balanced', 'detailed'] as const;
+const CONTEXTS = ['internal', 'external'] as const;
+const OUTPUTS = ['resume', 'both', 'full'] as const;
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { jobPosting, resume, tone, context, output, sessionToken } = body;
 
-    // Validate inputs
-    if (!jobPosting || !resume) {
-      return NextResponse.json(
-        { error: 'Job posting and resume are required' },
-        { status: 400 }
-      );
-    }
+    const jobPosting = requireString('jobPosting', body.jobPosting, {
+      min: 50,
+      max: INPUT_LIMITS.jobPosting,
+    });
+    const resume = requireString('resume', body.resume, {
+      min: 50,
+      max: INPUT_LIMITS.resume,
+    });
+    const tone = body.tone ? requireEnum('tone', body.tone, TONES) : 'balanced';
+    const context = body.context ? requireEnum('context', body.context, CONTEXTS) : 'external';
+    const output = body.output ? requireEnum('output', body.output, OUTPUTS) : 'both';
+    const sessionToken = typeof body.sessionToken === 'string' ? body.sessionToken : undefined;
 
-    if (jobPosting.length < 50 || resume.length < 50) {
-      return NextResponse.json(
-        { error: 'Please provide complete job posting and resume content' },
-        { status: 400 }
-      );
-    }
+    const ip = extractIp(req.headers);
+    const ipHash = hashIp(ip);
 
-    // Hash IP for anonymous tracking (no PII stored)
-    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-    const ipHash = createHash('sha256').update(ip).digest('hex').slice(0, 16);
+    const user = await getOptionalUser();
 
-    // Check for authenticated user
-    let userId: string | null = null;
-    try {
-      const supabase = await createSupabaseServer();
-      const { data: { user } } = await supabase.auth.getUser();
-      userId = user?.id ?? null;
-    } catch {}
+    if (user) {
+      await enforceRateLimit('analyze', { kind: 'user', userId: user.id });
 
-    // Tier-based usage check (authenticated users only)
-    if (userId) {
-      const { data: profile } = await getSupabaseAdmin()
-        .from('profiles')
-        .select('tier')
-        .eq('id', userId)
-        .single();
-
-      const tier: Tier = (profile?.tier as Tier) || 'free';
+      const tier: Tier = await getUserTier(user.id);
       const limit = getAnalysisLimit(tier);
-
       if (limit !== Infinity) {
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
@@ -62,34 +49,30 @@ export async function POST(req: NextRequest) {
         const { count } = await getSupabaseAdmin()
           .from('sessions')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId)
+          .eq('user_id', user.id)
           .gte('created_at', startOfMonth.toISOString());
 
         if ((count ?? 0) >= limit) {
-          return NextResponse.json(
-            {
-              error: `You've reached your ${limit} analysis limit for this month. Upgrade to run more analyses.`,
-              limitReached: true,
-              tier,
-            },
-            { status: 402 }
+          throw paymentRequired(
+            `You've reached your ${limit} analysis limit for this month. Upgrade to run more analyses.`,
+            { limitReached: true, tier },
           );
         }
       }
+    } else {
+      await enforceRateLimit('analyze', { kind: 'ip', ipHash });
     }
 
-    // Store session in Supabase
     const token = sessionToken || crypto.randomUUID();
     const sessionData = {
       session_token: token,
       job_posting: jobPosting,
-      resume: resume,
-      tone: tone || 'balanced',
-      context: context || 'external',
-      output_preference: output || 'both',
+      resume,
+      tone,
+      context,
+      output_preference: output,
       ip_hash: ipHash,
-      user_id: userId,
-      // New V2 fields — populated after AI response
+      user_id: user?.id ?? null,
     };
 
     const { data: session, error: sessionError } = await getSupabaseAdmin()
@@ -100,95 +83,85 @@ export async function POST(req: NextRequest) {
 
     if (sessionError) {
       console.error('Session storage error:', sessionError);
-      // Don't fail the request — continue without storage
     }
 
     const sessionId = session?.id;
 
-    // Build the prompt
-    const userPrompt = buildUserPrompt(
-      jobPosting,
-      resume,
-      tone || 'balanced',
-      context || 'external',
-      output || 'both'
-    );
+    const userPrompt = buildUserPrompt(jobPosting, resume, tone, context, output);
 
-    // Call OpenAI (non-streaming for reliability, returns structured JSON)
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.3, // Lower temp = more consistent, professional output
-      max_tokens: 12000, // Increased to support richer five-layer output
+      temperature: 0.3,
+      max_tokens: 12000,
     });
 
     const rawOutput = completion.choices[0]?.message?.content;
-    if (!rawOutput) {
-      return NextResponse.json({ error: 'No output generated' }, { status: 500 });
+    if (!rawOutput) throw badRequest('No output generated.');
+
+    let parsedJson: unknown;
+    try {
+      parsedJson = JSON.parse(rawOutput);
+    } catch {
+      console.error('[analyze] JSON parse failure');
+      throw badRequest('AI output was not valid JSON. Please retry.');
     }
 
     let parsed;
     try {
-      parsed = JSON.parse(rawOutput);
-    } catch {
-      return NextResponse.json({ error: 'Failed to parse AI output' }, { status: 500 });
+      parsed = parseAnalyzeOutput(parsedJson);
+    } catch (e) {
+      console.error('[analyze] schema mismatch', e);
+      throw badRequest('AI output did not match the expected format. Please retry.');
     }
 
-    // Update session with V2 fields from AI output
-    if (sessionId && (parsed.intentDetected || parsed.completionStatus)) {
+    if (sessionId) {
       await getSupabaseAdmin()
         .from('sessions')
         .update({
-          intent: parsed.intentDetected ?? 'direct_improvement',
-          completion_status: parsed.completionStatus ?? null,
+          intent: parsed.intentDetected,
+          completion_status: parsed.completionStatus,
         })
         .eq('id', sessionId);
-    }
 
-    // Store generated documents in Supabase
-    if (sessionId) {
-      const docs = [];
-
-      if (parsed.resume) {
-        docs.push({ session_id: sessionId, doc_type: 'resume', content: parsed.resume, version: 1 });
-      }
+      const docs = [
+        { session_id: sessionId, doc_type: 'resume', content: parsed.resume, version: 1 },
+      ];
       if (parsed.coverLetter) {
-        docs.push({ session_id: sessionId, doc_type: 'cover_letter', content: parsed.coverLetter, version: 1 });
-      }
-      if (parsed.atsReport) {
-        docs.push({ session_id: sessionId, doc_type: 'ats_report', content: JSON.stringify(parsed.atsReport), version: 1 });
-      }
-
-      if (docs.length > 0) {
-        const { error: docsError } = await getSupabaseAdmin()
-          .from('documents')
-          .insert(docs);
-
-        if (docsError) {
-          console.error('Document storage error:', docsError);
-        }
-      }
-
-      // Store modular achievements if any were generated
-      if (parsed.modularAchievements?.length > 0 && userId) {
-        const achievements = parsed.modularAchievements.map((content: string) => ({
+        docs.push({
           session_id: sessionId,
-          user_id: userId,
+          doc_type: 'cover_letter',
+          content: parsed.coverLetter,
+          version: 1,
+        });
+      }
+      docs.push({
+        session_id: sessionId,
+        doc_type: 'ats_report',
+        content: JSON.stringify(parsed.atsReport),
+        version: 1,
+      });
+
+      const { error: docsError } = await getSupabaseAdmin()
+        .from('documents')
+        .insert(docs);
+      if (docsError) console.error('Document storage error:', docsError);
+
+      if (parsed.modularAchievements.length > 0 && user?.id) {
+        const achievements = parsed.modularAchievements.map((content) => ({
+          session_id: sessionId,
+          user_id: user.id,
           content,
           tags: [],
         }));
-
         const { error: achievementsError } = await getSupabaseAdmin()
           .from('modular_achievements')
           .insert(achievements);
-
-        if (achievementsError) {
-          console.error('Modular achievements storage error:', achievementsError);
-        }
+        if (achievementsError) console.error('Modular achievements error:', achievementsError);
       }
     }
 
@@ -201,19 +174,16 @@ export async function POST(req: NextRequest) {
       coverLetter: parsed.coverLetter,
       atsReport: parsed.atsReport,
       redlineChanges: parsed.redlineChanges,
-      // V2 new fields
-      modularAchievements: parsed.modularAchievements ?? [],
-      intentDetected: parsed.intentDetected ?? 'direct_improvement',
-      completionStatus: parsed.completionStatus ?? null,
+      modularAchievements: parsed.modularAchievements,
+      intentDetected: parsed.intentDetected,
+      completionStatus: parsed.completionStatus,
       usage: {
         promptTokens: completion.usage?.prompt_tokens,
         completionTokens: completion.usage?.completion_tokens,
+        cachedTokens: completion.usage?.prompt_tokens_details?.cached_tokens,
       },
     });
-
-  } catch (error: unknown) {
-    console.error('Analyze error:', error);
-    const message = error instanceof Error ? error.message : 'Analysis failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error) {
+    return handleRouteError('analyze', error);
   }
 }

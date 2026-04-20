@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import { Send, Plus, ArrowLeft, Loader2, MessageSquare } from "lucide-react";
 import { Nav } from "@/components/Nav";
 
+type Role = "user" | "assistant" | "system";
+
 interface Message {
   id?: string;
-  role: "user" | "assistant";
+  role: Role;
   content: string;
   createdAt?: string;
 }
@@ -72,7 +74,7 @@ export default function ChatClient({
     fetch("/api/chat")
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data?.conversations) setConversations(data.conversations); })
-      .catch(() => {});
+      .catch((err) => console.warn("Failed to load conversations:", err));
   }, []);
 
   // Load specific conversation
@@ -82,14 +84,16 @@ export default function ChatClient({
       return;
     }
     setLoadingHistory(true);
-    fetch(`/api/chat?conversationId=${activeConversationId}`)
+    fetch(`/api/chat?conversationId=${encodeURIComponent(activeConversationId)}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.messages) {
-          setMessages(data.messages.filter((m: Message) => m.role !== "system" as string));
+          setMessages(
+            (data.messages as Message[]).filter((m) => m.role !== "system"),
+          );
         }
       })
-      .catch(() => {})
+      .catch((err) => console.warn("Failed to load conversation history:", err))
       .finally(() => setLoadingHistory(false));
   }, [activeConversationId]);
 
@@ -172,7 +176,9 @@ export default function ChatClient({
             if (data.error) {
               setError(data.error);
             }
-          } catch {}
+          } catch (err) {
+            console.warn("Malformed SSE payload:", err);
+          }
         }
       }
     } catch (err) {
@@ -246,7 +252,7 @@ export default function ChatClient({
                     <div className={`text-xs font-medium truncate ${
                       activeConversationId === conv.id ? "text-[#F9F7F3]" : "text-[#9CA3AF]"
                     }`}>
-                      {INTENT_LABELS[conv.intent || ""] || "Guided Session"}
+                      {(conv.intent && INTENT_LABELS[conv.intent]) || "Guided Session"}
                     </div>
                   </div>
                   <div className="text-[10px] text-[#4A5568] pl-4">

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { Logo } from "@/components/Logo";
 import {
   User, LogOut, FileText, Clock, ChevronRight,
   BookOpen, MessageSquare, Copy, CheckCircle,
@@ -104,12 +105,7 @@ export default function ProfileClient({
     <div className="min-h-screen bg-[#0E1A2B] flex flex-col">
       {/* Nav */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A3F5F]">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 border border-[#C5933A] flex items-center justify-center">
-            <span className="text-[#C5933A] text-xs font-semibold">E</span>
-          </div>
-          <span className="text-[#F9F7F3] text-sm font-medium tracking-wider">EBRB</span>
-        </Link>
+        <Logo />
         <div className="flex items-center gap-4">
           <span className="text-[#9CA3AF] text-sm">{displayName}</span>
           <button
@@ -349,7 +345,7 @@ export default function ProfileClient({
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="text-[#F9F7F3] text-sm">
-                                  {INTENT_LABELS[conv.intent || ""] || "Guided Session"}
+                                  {(conv.intent && INTENT_LABELS[conv.intent]) || "Guided Session"}
                                 </span>
                                 {conv.intent && INTENT_COLORS[conv.intent] && (
                                   <span className={`text-[10px] font-medium px-1.5 py-0.5 border rounded-sm ${INTENT_COLORS[conv.intent]}`}>

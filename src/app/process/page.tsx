@@ -75,11 +75,21 @@ export default function ProcessPage() {
 
   // Call the real API
   useEffect(() => {
-    const form = JSON.parse(sessionStorage.getItem("ebrb_form") || "{}");
+    let form: { jobPosting?: string; resume?: string } = {};
+    let parseError = false;
+    try {
+      const raw = sessionStorage.getItem("ebrb_form");
+      form = raw ? JSON.parse(raw) : {};
+    } catch {
+      parseError = true;
+    }
 
-    if (!form.jobPosting || !form.resume) {
+    if (parseError || !form.jobPosting || !form.resume) {
+      const msg = parseError
+        ? "Couldn't read your input. Please go back and try again."
+        : "Missing input data. Please go back and try again.";
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setError("Missing input data. Please go back and try again.");
+      setError(msg);
       return;
     }
 
@@ -93,8 +103,18 @@ export default function ProcessPage() {
         return res.json();
       })
       .then((data) => {
-        // Store results for the results page
-        localStorage.setItem("ebrb_results", JSON.stringify(data));
+        // Persist only non-sensitive identifiers. Content stays server-side
+        // and is fetched via /api/my-results after auth + claim-session.
+        try {
+          if (data.sessionToken) {
+            sessionStorage.setItem("ebrb_session_token", data.sessionToken);
+          }
+          if (data.sessionId) {
+            sessionStorage.setItem("ebrb_session_id", data.sessionId);
+          }
+          sessionStorage.removeItem("ebrb_form");
+          localStorage.removeItem("ebrb_results");
+        } catch {}
         setApiDone(true);
       })
       .catch((err) => {

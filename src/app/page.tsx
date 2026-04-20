@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, ChevronDown, Shield, Zap, Target, BarChart3, FileText, Lock, User } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
+import { Logo } from "@/components/Logo";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
@@ -23,12 +24,7 @@ function Nav() {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-[#0E1A2B]/95 backdrop-blur-sm border-b border-[#2A3F5F]" : "bg-transparent"}`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 border border-[#C5933A] flex items-center justify-center">
-            <span className="text-[#C5933A] text-xs font-semibold">E</span>
-          </div>
-          <span className="text-[#F9F7F3] text-sm font-medium tracking-wider">EBRB</span>
-        </div>
+        <Logo />
         <div className="hidden md:flex items-center gap-8">
           <a href="#how-it-works" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">How It Works</a>
           <a href="#about" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">About</a>
@@ -39,9 +35,10 @@ function Nav() {
             user ? (
               <Link
                 href="/profile"
+                aria-label="Profile"
                 className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors"
               >
-                <User size={14} />
+                <User size={14} aria-hidden="true" />
                 <span className="hidden sm:inline">{user.email?.split("@")[0]}</span>
               </Link>
             ) : (

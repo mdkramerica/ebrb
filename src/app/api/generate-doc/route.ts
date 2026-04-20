@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { createSupabaseServer } from '@/lib/supabase/server';
 import { DOC_TYPE_TIER } from '@/lib/tiers';
 import type { Tier } from '@/lib/tiers';
+import { requireUser, getUserTier, assertTier, requireSessionOwnership } from '@/lib/api/auth';
+import { enforceRateLimit } from '@/lib/api/rate-limit';
+import { getOpenAI, INJECTION_GUARD } from '@/lib/api/openai';
+import { handleRouteError, notFound, badRequest } from '@/lib/api/errors';
+import { INPUT_LIMITS, fenceUserContent, requireEnum, requireString, requireUuid } from '@/lib/api/validation';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-const TIER_ORDER: Record<Tier, number> = { free: 0, executive: 1, unlimited: 2 };
-
-function tierSatisfies(userTier: Tier, requiredTier: Tier): boolean {
-  return TIER_ORDER[userTier] >= TIER_ORDER[requiredTier];
-}
-
-// Doc-type-specific generation prompts (appended to the resume content)
 const DOC_PROMPTS: Record<string, string> = {
   executive_bio: `Generate a polished executive biography of approximately 300 words.
 
@@ -121,63 +115,33 @@ Tone: strategic, honest, specific. This is for the executive's own use — no ma
 Return plain text only. No JSON.`,
 };
 
+const ALLOWED_DOC_TYPES = Object.keys(DOC_PROMPTS) as readonly string[];
+
 export async function POST(req: NextRequest) {
   try {
+    const user = await requireUser();
+    await enforceRateLimit('generate-doc', { kind: 'user', userId: user.id });
+
     const body = await req.json();
-    const { sessionId, docType, customInstructions } = body;
+    const sessionId = requireUuid('sessionId', body.sessionId);
+    const docType = requireEnum('docType', body.docType, ALLOWED_DOC_TYPES);
+    const customInstructions = body.customInstructions
+      ? requireString('customInstructions', body.customInstructions, { max: INPUT_LIMITS.customInstructions })
+      : '';
 
-    if (!sessionId || !docType) {
-      return NextResponse.json({ error: 'sessionId and docType are required' }, { status: 400 });
-    }
-
-    if (!DOC_PROMPTS[docType]) {
-      return NextResponse.json({ error: `Unknown doc type: ${docType}` }, { status: 400 });
-    }
-
-    // Auth check
-    let userId: string | null = null;
-    let userTier: Tier = 'free';
-
-    try {
-      const supabase = await createSupabaseServer();
-      const { data: { user } } = await supabase.auth.getUser();
-      userId = user?.id ?? null;
-
-      if (userId) {
-        const { data: profile } = await getSupabaseAdmin()
-          .from('profiles')
-          .select('tier')
-          .eq('id', userId)
-          .single();
-        userTier = (profile?.tier as Tier) || 'free';
-      }
-    } catch {}
-
-    // Tier check
     const requiredTier = DOC_TYPE_TIER[docType] as Tier;
-    if (!tierSatisfies(userTier, requiredTier)) {
-      return NextResponse.json(
-        {
-          error: `This document type requires the ${requiredTier} plan. You are on the ${userTier} plan.`,
-          tierRequired: requiredTier,
-          tierCurrent: userTier,
-        },
-        { status: 403 }
-      );
-    }
+    const userTier = await getUserTier(user.id);
+    assertTier(userTier, requiredTier);
 
-    // Fetch the session's existing resume content
+    await requireSessionOwnership(user.id, sessionId);
+
     const { data: session } = await getSupabaseAdmin()
       .from('sessions')
       .select('job_posting, resume')
       .eq('id', sessionId)
       .single();
+    if (!session) throw notFound('Session not found.');
 
-    if (!session) {
-      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
-    }
-
-    // Fetch the generated resume from documents table (the V2 output)
     const { data: resumeDoc } = await getSupabaseAdmin()
       .from('documents')
       .select('content')
@@ -189,20 +153,21 @@ export async function POST(req: NextRequest) {
 
     const resumeContent = resumeDoc?.content || session.resume;
 
-    // Build the generation prompt
     const docPrompt = DOC_PROMPTS[docType];
-    const customNote = customInstructions ? `\n\nAdditional instructions: ${customInstructions}` : '';
+    const customNote = customInstructions
+      ? `\n\nAdditional instructions:\n${fenceUserContent('customInstructions', customInstructions)}`
+      : '';
 
-    const userMessage = `Based on the following resume, ${docPrompt}${customNote}
+    const userMessage = `${INJECTION_GUARD}
 
----
+Based on the resume below, ${docPrompt}${customNote}
 
 RESUME:
-${resumeContent}
+${fenceUserContent('resume', resumeContent)}
 
-${session.job_posting ? `---\n\nORIGINAL JOB POSTING CONTEXT:\n${session.job_posting.slice(0, 1000)}` : ''}`;
+${session.job_posting ? `JOB POSTING CONTEXT:\n${fenceUserContent('jobPosting', session.job_posting.slice(0, 2000))}` : ''}`;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1',
       messages: [
         {
@@ -212,15 +177,12 @@ ${session.job_posting ? `---\n\nORIGINAL JOB POSTING CONTEXT:\n${session.job_pos
         { role: 'user', content: userMessage },
       ],
       temperature: 0.4,
-      max_tokens: 3000,
+      max_tokens: 6000,
     });
 
     const content = completion.choices[0]?.message?.content;
-    if (!content) {
-      return NextResponse.json({ error: 'No content generated' }, { status: 500 });
-    }
+    if (!content) throw badRequest('No content generated.');
 
-    // Store the generated document
     const { data: doc, error: docError } = await getSupabaseAdmin()
       .from('documents')
       .insert({
@@ -241,9 +203,7 @@ ${session.job_posting ? `---\n\nORIGINAL JOB POSTING CONTEXT:\n${session.job_pos
       docType,
       content,
     });
-  } catch (error: unknown) {
-    console.error('generate-doc error:', error);
-    const message = error instanceof Error ? error.message : 'Generation failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error) {
+    return handleRouteError('generate-doc', error);
   }
 }

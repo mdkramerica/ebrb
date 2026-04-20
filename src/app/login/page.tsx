@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { safeRedirect } from "@/lib/safe-redirect";
+import { Logo } from "@/components/Logo";
 import { AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/results";
+  const redirect = safeRedirect(searchParams.get("redirect"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,12 +54,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#0E1A2B] flex flex-col">
       {/* Nav */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A3F5F]">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 border border-[#C5933A] flex items-center justify-center">
-            <span className="text-[#C5933A] text-xs font-semibold">E</span>
-          </div>
-          <span className="text-[#F9F7F3] text-sm font-medium tracking-wider">EBRB</span>
-        </Link>
+        <Logo />
       </div>
 
       {/* Login form */}
@@ -71,8 +68,12 @@ export default function LoginPage() {
           </p>
 
           {error && (
-            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 mb-6">
-              <AlertCircle size={14} className="flex-shrink-0" />
+            <div
+              id="login-error"
+              role="alert"
+              className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 mb-6"
+            >
+              <AlertCircle size={14} className="flex-shrink-0" aria-hidden="true" />
               {error}
             </div>
           )}
@@ -110,11 +111,13 @@ export default function LoginPage() {
           </div>
 
           {/* Email/Password form */}
-          <form onSubmit={handleEmailLogin} className="space-y-4">
+          <form onSubmit={handleEmailLogin} className="space-y-4" aria-describedby={error ? "login-error" : undefined}>
             <div>
-              <label className="block text-xs text-[#9CA3AF] mb-1.5">Email</label>
+              <label htmlFor="login-email" className="block text-xs text-[#9CA3AF] mb-1.5">Email</label>
               <input
+                id="login-email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -123,9 +126,11 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-[#9CA3AF] mb-1.5">Password</label>
+              <label htmlFor="login-password" className="block text-xs text-[#9CA3AF] mb-1.5">Password</label>
               <input
+                id="login-password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

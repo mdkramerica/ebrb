@@ -1,30 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { SYSTEM_PROMPT } from '@/lib/prompt';
+import { requireUser, requireSessionOwnership } from '@/lib/api/auth';
+import { enforceRateLimit } from '@/lib/api/rate-limit';
+import { getOpenAI, INJECTION_GUARD } from '@/lib/api/openai';
+import { handleRouteError, badRequest } from '@/lib/api/errors';
+import { INPUT_LIMITS, fenceUserContent, requireEnum, requireString, requireUuid } from '@/lib/api/validation';
+import { DOC_TYPE_LABELS } from '@/lib/tiers';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const REFINABLE_DOC_TYPES = Object.keys(DOC_TYPE_LABELS) as readonly string[];
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { sessionId, instruction, docType, currentContent } = body;
+    const user = await requireUser();
+    await enforceRateLimit('refine', { kind: 'user', userId: user.id });
 
-    if (!instruction || !currentContent) {
-      return NextResponse.json(
-        { error: 'Instruction and current content are required' },
-        { status: 400 }
-      );
+    const body = await req.json();
+    const instruction = requireString('instruction', body.instruction, {
+      min: 3,
+      max: INPUT_LIMITS.instruction,
+    });
+    const currentContent = requireString('currentContent', body.currentContent, {
+      min: 10,
+      max: INPUT_LIMITS.content,
+    });
+
+    let sessionId: string | null = null;
+    let docType: string | null = null;
+    if (body.sessionId !== undefined || body.docType !== undefined) {
+      sessionId = requireUuid('sessionId', body.sessionId);
+      docType = requireEnum('docType', body.docType, REFINABLE_DOC_TYPES);
+      await requireSessionOwnership(user.id, sessionId);
     }
 
     const refinePrompt = `You are refining an already-written executive resume document.
 
-REFINEMENT INSTRUCTION: "${instruction}"
+${INJECTION_GUARD}
+
+REFINEMENT INSTRUCTION:
+${fenceUserContent('instruction', instruction)}
 
 CURRENT DOCUMENT:
-${currentContent}
+${fenceUserContent('currentContent', currentContent)}
 
 Apply the refinement instruction to the document above. Return ONLY the refined document text — no commentary, no explanation, no JSON. Just the improved document.
 
@@ -35,24 +52,20 @@ Rules:
 - Do not add new sections unless explicitly asked
 - Do not remove content unless explicitly asked to trim/condense`;
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: refinePrompt },
       ],
       temperature: 0.3,
-      max_tokens: 4000,
+      max_tokens: 6000,
     });
 
     const refined = completion.choices[0]?.message?.content;
-    if (!refined) {
-      return NextResponse.json({ error: 'No output generated' }, { status: 500 });
-    }
+    if (!refined) throw badRequest('No output generated.');
 
-    // Store new version in Supabase if we have a session
     if (sessionId && docType) {
-      // Get current version count
       const { data: existing } = await getSupabaseAdmin()
         .from('documents')
         .select('version')
@@ -75,10 +88,7 @@ Rules:
     }
 
     return NextResponse.json({ refined });
-
-  } catch (error: unknown) {
-    console.error('Refine error:', error);
-    const message = error instanceof Error ? error.message : 'Refinement failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error) {
+    return handleRouteError('refine', error);
   }
 }

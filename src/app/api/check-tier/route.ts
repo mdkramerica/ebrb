@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase/server';
-import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getTierFlags, getAnalysisLimit } from '@/lib/tiers';
 import type { Tier } from '@/lib/tiers';
 
@@ -10,7 +9,6 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      // Unauthenticated users get free tier flags
       return NextResponse.json({
         tier: 'free',
         flags: getTierFlags('free'),
@@ -19,8 +17,7 @@ export async function GET() {
       });
     }
 
-    // Fetch the user's profile for their tier
-    const { data: profile } = await getSupabaseAdmin()
+    const { data: profile } = await supabase
       .from('profiles')
       .select('tier')
       .eq('id', user.id)
@@ -28,12 +25,11 @@ export async function GET() {
 
     const tier: Tier = (profile?.tier as Tier) || 'free';
 
-    // Count analyses this calendar month
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const { count } = await getSupabaseAdmin()
+    const { count } = await supabase
       .from('sessions')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -52,8 +48,8 @@ export async function GET() {
   } catch (error) {
     console.error('check-tier error:', error);
     return NextResponse.json(
-      { tier: 'free', flags: getTierFlags('free'), error: 'Could not fetch tier' },
-      { status: 200 } // non-breaking — default to free
+      { tier: 'free', flags: getTierFlags('free') },
+      { status: 200 },
     );
   }
 }

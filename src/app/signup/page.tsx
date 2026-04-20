@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { safeRedirect } from "@/lib/safe-redirect";
+import { Logo } from "@/components/Logo";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/results";
+  const redirect = safeRedirect(searchParams.get("redirect"));
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -65,12 +67,7 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen bg-[#0E1A2B] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A3F5F]">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 border border-[#C5933A] flex items-center justify-center">
-              <span className="text-[#C5933A] text-xs font-semibold">E</span>
-            </div>
-            <span className="text-[#F9F7F3] text-sm font-medium tracking-wider">EBRB</span>
-          </Link>
+          <Logo />
         </div>
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="max-w-sm text-center">
@@ -115,8 +112,12 @@ export default function SignupPage() {
           </p>
 
           {error && (
-            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 mb-6">
-              <AlertCircle size={14} className="flex-shrink-0" />
+            <div
+              id="signup-error"
+              role="alert"
+              className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 mb-6"
+            >
+              <AlertCircle size={14} className="flex-shrink-0" aria-hidden="true" />
               {error}
             </div>
           )}
@@ -153,11 +154,13 @@ export default function SignupPage() {
             <div className="flex-1 h-px bg-[#2A3F5F]" />
           </div>
 
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4" aria-describedby={error ? "signup-error" : undefined}>
             <div>
-              <label className="block text-xs text-[#9CA3AF] mb-1.5">Full name</label>
+              <label htmlFor="signup-name" className="block text-xs text-[#9CA3AF] mb-1.5">Full name</label>
               <input
+                id="signup-name"
                 type="text"
+                autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm px-3 py-2.5 outline-none transition-colors"
@@ -165,9 +168,11 @@ export default function SignupPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-[#9CA3AF] mb-1.5">Email</label>
+              <label htmlFor="signup-email" className="block text-xs text-[#9CA3AF] mb-1.5">Email</label>
               <input
+                id="signup-email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -176,9 +181,11 @@ export default function SignupPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-[#9CA3AF] mb-1.5">Password</label>
+              <label htmlFor="signup-password" className="block text-xs text-[#9CA3AF] mb-1.5">Password</label>
               <input
+                id="signup-password"
                 type="password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
