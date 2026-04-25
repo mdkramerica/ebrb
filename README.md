@@ -1,159 +1,137 @@
 # EBRB — Executive Brand & Resume Builder
 
-A premium, AI-powered resume positioning platform built by executive recruiter John Nilon (30+ years in talent acquisition).
+A premium AI-powered career positioning platform built by executive recruiter John Nilon (J.N. Solutions, 30+ years in talent acquisition). EBRB decodes what employers actually need in a role, then repositions a candidate's narrative around that mandate. Not a template tool — a strategic repositioning engine for CEOs, VPs, and C-suite executives.
 
-## What It Does
+## Core Flow
 
-EBRB decodes what employers actually need in a role, then repositions your career narrative around that mandate. Not a template tool — a strategic repositioning engine.
-
-**Core flow:**
 1. Upload job posting + resume
-2. AI decodes employer mandate & capability signals
-3. Generates tailored resume, cover letter, ATS keyword report
-4. Shows before/after keyword alignment + redline comparison
+2. AI decodes the employer mandate and capability signals
+3. System generates tailored resume, cover letter, and ATS keyword report
+4. User sees before/after keyword alignment, redline comparison, and (on paid tiers) extended docs — executive bio, LinkedIn summary, interview stories, board bio, speaking intro
+
+The product frames outcomes around two gaps: **Access** (getting past ATS/keyword filters) and **Selection** (hiring-committee confidence). Every output is shaped by the Achievement Formula: `[Result/Changed State] → [Limited Context] → [Optional Action]` — outcome-first, never action-first.
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router, TypeScript)
-- **Styling:** Tailwind CSS + custom design tokens
-- **Animation:** Framer Motion
-- **Hosting:** Vercel-ready
-- **Auth:** Clerk (ready to integrate)
-- **Backend:** OpenAI API (custom prompt reverse-engineered from working GPT, ready for direct API integration)
+- **Framework:** Next.js 16.1.6 (App Router) + React 19 + TypeScript 5
+- **Styling:** Tailwind CSS 4, Framer Motion, Radix UI primitives
+- **Auth & DB:** Supabase (PostgreSQL, Auth with PKCE + email OTP, RLS)
+- **AI:** OpenAI GPT-4.1 (12k max_tokens per analysis)
+- **Docs:** `docx` + `jspdf` + `file-saver` for Word/PDF export
+- **Hosting:** Railway (Nixpacks, health check at `/api/health`)
+- **Node:** `>=22.0.0`, npm `>=10.0.0`
 
-## Structure
+## Five-Layer AI Architecture
+
+The AI "brain" is a single ~459-line system prompt at [src/lib/prompt.ts](src/lib/prompt.ts), injected into every OpenAI call. It encodes John Nilon's methodology (the source PDFs live in the untracked `EBRB Documents_3-10-2026/` folder) across five layers:
+
+1. **Master Operating Rules** — behavior priority, tone handling, Achievement Formula, completion checklist
+2. **Outcome-First Methodology (J.N. Solutions KD)** — Value Proposition discovery, Key Accomplishments, Job Mandate decoding
+3. **Intent Detection & Routing** — classifies the first message into one of ~8 intents (direct_improvement, traction_diagnostic, positioning_discovery, interview_prep, etc.)
+4. **Navigator Flows (A–F)** — multi-step protocols for each intent (e.g. Flow E is the 5-step direct-improvement pipeline)
+5. **Hiring Outcome Model** — two-phase model (Access then Selection) that shapes every output silently
+
+The layers are applied invisibly — users never see the framework named. Intent classification is done via regex keyword matching in the chat route (not a separate GPT call) for cost reasons.
+
+## Directory Structure
 
 ```
-src/app/
-├── page.tsx           # Landing page (6 sections, full scroll experience)
-├── intake/page.tsx    # Job posting + resume upload (3-step wizard)
-├── process/page.tsx   # Live AI analysis screen (12-step analysis with insights)
-├── results/page.tsx   # Resume preview + export (multi-doc viewer, refinement)
-├── layout.tsx         # Root layout with fonts + globals
-└── globals.css        # Design system (colors, typography, animations)
+src/
+├── app/
+│   ├── page.tsx               Landing page
+│   ├── intake/                3-step wizard: job posting, resume, preferences
+│   ├── process/               Streaming analysis visualization
+│   ├── results/               Document viewer, redline, export, refinement
+│   ├── chat/                  Guided chat sessions (Executive tier+)
+│   ├── profile/               User profile, session history, achievement library
+│   ├── login/, signup/        Supabase Auth UI
+│   ├── auth/callback/         PKCE + OTP callback
+│   └── api/
+│       ├── analyze/           Main analysis engine
+│       ├── refine/            Iterative refinement
+│       ├── chat/              SSE streaming chat
+│       ├── generate-doc/      Extended doc types (bio, LinkedIn, interview stories, etc.)
+│       ├── claim-session/     Links anonymous sessions to new accounts
+│       ├── my-results/        User's document index
+│       ├── check-tier/        Lightweight tier flags endpoint
+│       └── health/            Railway health check
+├── components/                Nav, Logo, AuthProvider
+├── lib/
+│   ├── prompt.ts              Five-layer system prompt
+│   ├── tiers.ts               Tier definitions, feature flags, doc-type gating
+│   ├── public-origin.ts       Resolves public origin via x-forwarded-host
+│   ├── safe-redirect.ts       Whitelist-based open-redirect prevention
+│   ├── supabase/              client / server / admin / middleware
+│   └── api/                   auth, errors, rate-limit, openai, validation, analyze-schema
+└── middleware.ts              Protects /profile and /chat
 ```
 
-## Design System
+## Database
 
-**Colors:**
-- Navy `#0E1A2B` (primary background)
-- Gold `#C5933A` (accent, authority)
-- Cream `#F9F7F3` (off-white, premium paper feel)
-- Slate `#4A5568` (neutral text)
+Supabase schema lives in three SQL files:
 
-**Typography:**
-- Display: Cormorant Garamond (editorial, premium)
-- Body: Inter (clean, modern)
-- Mono: IBM Plex Mono (code/technical)
+- [supabase-schema.sql](supabase-schema.sql) — `sessions`, `documents`
+- [supabase-migration-auth.sql](supabase-migration-auth.sql) — `profiles` (with tier), auto-create trigger, base RLS policies
+- [supabase-migration-phase2.sql](supabase-migration-phase2.sql) — `conversations`, `messages`, `modular_achievements`, `rate_limits`
 
-**Spacing & Motion:**
-- Smooth fade-ins, no bouncy animations
-- Generous whitespace (premium aesthetic)
-- Progress indicators on key flows
+All API routes use the Supabase service role (admin) client and bypass RLS intentionally; ownership is enforced manually via helpers in [src/lib/api/auth.ts](src/lib/api/auth.ts) (`requireSessionOwnership`, `requireConversationOwnership`). RLS is enabled as a safety net.
 
-## Getting Started
+## Tiers
+
+Defined in [src/lib/tiers.ts](src/lib/tiers.ts):
+
+| Tier       | Price    | Analyses/mo | Downloads | Extended docs            | Chat |
+|------------|----------|-------------|-----------|--------------------------|------|
+| Free       | Free     | 1           | preview   | no                       | no   |
+| Executive  | $59      | 5           | PDF + DOCX | bio, LinkedIn, stories  | yes  |
+| Unlimited  | $99/mo   | ∞           | PDF + DOCX | + board bio, speaking   | yes  |
+
+Payment is not yet integrated — tier is set manually in the `profiles.tier` column.
+
+## Security
+
+Covered in the security-hardening pass:
+
+- **Input limits** — jobPosting ≤ 50k, resume ≤ 20k, message ≤ 5k chars
+- **Prompt-injection fencing** — user content is always wrapped in `<USER_CONTENT>...</USER_CONTENT>` with an injection-guard clause in the system prompt
+- **DB-backed rate limiting** — sliding-window limiter in `rate_limits` table keyed by user UUID or IP hash; fails open on DB error
+- **Ownership checks** — every API route that touches user data validates ownership explicitly
+- **Generic error responses** — all errors return `{error, requestId}` with no stack traces
+- **Safe redirects** — post-auth redirects run through a whitelist in [src/lib/safe-redirect.ts](src/lib/safe-redirect.ts)
+
+## Local Development
 
 ```bash
-cd ~/clawd/projects/ebrb-app
+npm install
 npm run dev
 ```
 
-Then open http://localhost:3000
+Open http://localhost:3000.
 
-## Pages
+Required environment variables (in `.env.local`):
 
-### `/` — Landing Page
-- Hero section with immediate value prop
-- Transformation demo (before/after examples)
-- How It Works (4-step process)
-- ATS alignment visualization
-- About John Nilon (credibility founder)
-- Pricing (3 tiers: Preview/Executive/Unlimited)
-- Final CTA
-
-### `/intake` — Brand Interview Flow
-- Step 1: Job posting (paste/upload)
-- Step 2: Resume (paste/upload)
-- Step 3: Preferences (tone, output format, context)
-- Animated transitions between steps
-- Real-time validation
-
-### `/process` — AI Analysis Screen
-- Live streaming analysis log (12 steps)
-- Typewriter-effect details on each step
-- Recruiter insights carousel
-- Progress bar
-- Auto-navigates to `/results` when done
-
-### `/results` — Output & Refinement
-- Side-by-side document viewer (resume/cover/ATS report)
-- Redline comparison tab (what changed & why)
-- Refinement input + quick-action chips
-- Export options (PDF, Word, Google Apps Script, email)
-- Version history
-- Next steps upsell
-
-## Backend Integration (Next Steps)
-
-Currently, the frontend is fully built. To wire up the backend:
-
-1. **Create `/api/analyze` endpoint** that:
-   - Accepts: job posting, resume, tone, context, output preference
-   - Calls OpenAI with the reverse-engineered system prompt
-   - Returns: tailored resume, cover letter, ATS report
-   - Streams analysis steps to client for progress UI
-
-2. **Create `/api/refine` endpoint** for iterative refinement
-
-3. **Add authentication** (Clerk integration ready)
-
-4. **Add document storage** (Supabase or similar for version history)
-
-5. **Wire payment** (Stripe integration for tiers)
-
-## The Reverse-Engineered Prompt
-
-Located at: `~/clawd/projects/exec-brand-resume/system-prompt-v1.md`
-
-This is based on reverse-engineering the working GPT from the Sara Lovett workflow example. When the actual system prompt is available, replace this file and redeploy.
-
-## Key Features Ready to Implement
-
-- ✅ Landing page (full, polished, conversion-focused)
-- ✅ Intake flow (multi-step, animated, validated)
-- ✅ Process screen (streaming analysis visualization)
-- ✅ Results viewer (document preview, export, refinement UI)
-- ✅ Design system (comprehensive, premium aesthetic)
-- ✅ Mobile responsive (all screens)
-- ⏳ Backend API (prompt ready, needs OpenAI endpoint)
-- ⏳ Authentication (Clerk config ready)
-- ⏳ Payment (Stripe integration ready)
-- ⏳ Document storage (schema ready for Supabase)
-
-## Deployment
-
-```bash
-# Build
-npm run build
-
-# Deploy to Vercel
-vercel deploy
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENAI_API_KEY=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Or push to GitHub and connect to Vercel for auto-deploy.
+Run all three SQL files against your Supabase project before first use.
 
-## Notes for John Nilon
+## Deployment (Railway)
 
-This frontend is built to:
-1. **Signal premium quality** — Navy + gold + Cormorant typeface = executive-grade positioning
-2. **Build trust instantly** — Your story on the landing page, real transformation examples
-3. **Make the AI work visible** — Process screen shows the intelligence happening in real-time
-4. **Enable refinement loops** — Results page supports iteration without full rebuilds
-5. **Convert free → paid** — Preview tier proves value before payment gate
+Config in [railway.toml](railway.toml): Nixpacks builder, `npm run start`, health check at `/api/health` (30s timeout), restart-on-failure with 3 max retries.
 
-The backend system prompt is ready to integrate. Once you have the actual GPT system instructions, swap out `system-prompt-v1.md` and we're live.
+`/api/health` returns `{status, supabase, openai}` — use it to verify env wiring after deploy.
+
+The auth callback depends on Railway's reverse proxy forwarding `x-forwarded-host`. [src/lib/public-origin.ts](src/lib/public-origin.ts) resolves the public origin in this order: `NEXT_PUBLIC_APP_URL` → `x-forwarded-host` + `x-forwarded-proto` → host header → `request.url`. Any new auth-redirect code must use `getPublicOrigin()` — never `new URL(request.url).origin` directly.
+
+## Source Documents
+
+John Nilon's methodology PDFs live in an untracked `EBRB Documents_3-10-2026/` folder at the repo root. They are the source material for the five-layer prompt and are deliberately not committed. See `Documents Explanation.docx` for the mapping from each PDF to its prompt layer.
 
 ---
 
-**Built for John Nilon, J.N. Solutions**
-*30 years of executive search expertise + AI positioning engine*
+Built for John Nilon, J.N. Solutions.
