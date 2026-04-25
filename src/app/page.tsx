@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, ChevronDown, Shield, Zap, Target, BarChart3, FileText, Lock, User } from "lucide-react";
+import { ArrowRight, CheckCircle, ChevronDown, Shield, Target, Lock, User } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { Logo } from "@/components/Logo";
+import { AdventureGrid, ADVENTURES } from "@/components/AdventureGrid";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
@@ -26,6 +27,7 @@ function Nav() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Logo />
         <div className="hidden md:flex items-center gap-8">
+          <a href="#adventures" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">Paths</a>
           <a href="#how-it-works" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">How It Works</a>
           <a href="#about" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">About</a>
           <a href="#pricing" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">Pricing</a>
@@ -50,7 +52,7 @@ function Nav() {
               </Link>
             )
           )}
-          <Link href="/intake" className="bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] text-sm font-semibold px-5 py-2 transition-colors">
+          <Link href="/#adventures" className="bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] text-sm font-semibold px-5 py-2 transition-colors">
             Get Started
           </Link>
         </div>
@@ -71,20 +73,20 @@ function Hero() {
             <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">Built by a recruiter. Powered by AI.</span>
           </motion.div>
           <motion.h1 variants={fadeUp} className="font-display text-5xl md:text-7xl font-light text-[#F9F7F3] leading-[1.05] mb-6">
-            We decode the job.<br />
-            <em className="text-[#C5933A] not-italic">Then we reposition</em><br />
-            you for it.
+            Your career needs<br />
+            <em className="text-[#C5933A] not-italic">repositioning</em> —<br />
+            not a new template.
           </motion.h1>
           <motion.p variants={fadeUp} className="text-[#9CA3AF] text-lg md:text-xl font-light leading-relaxed mb-10 max-w-2xl">
-            Most resume tools format what you give them. This one figures out what the employer actually needs — then rebuilds your story around that. Built on 30 years of executive recruiting expertise.
+            Whether you&rsquo;re tailoring for a specific role, figuring out why you aren&rsquo;t getting interviews, or clarifying how to pitch yourself — pick the path that matches where you are. Built on 30 years of executive recruiting expertise.
           </motion.p>
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <Link href="/intake" className="group flex items-center gap-2 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-8 py-4 text-sm tracking-wide transition-all duration-200">
-              Upload Resume + Job Posting
+            <a href="#adventures" className="group flex items-center gap-2 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-8 py-4 text-sm tracking-wide transition-all duration-200">
+              See your paths
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </a>
             <a href="#how-it-works" className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">
-              See how it works <ChevronDown size={14} />
+              How it works <ChevronDown size={14} />
             </a>
           </motion.div>
           <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-6 mt-12 pt-12 border-t border-[#2A3F5F]">
@@ -121,7 +123,7 @@ function TransformationDemo() {
         <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger} className="text-center mb-16">
           <motion.div variants={fadeUp} className="flex justify-center mb-4"><div className="gold-rule" /></motion.div>
           <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">What actually changes</motion.h2>
-          <motion.p variants={fadeUp} className="text-[#9CA3AF] max-w-xl mx-auto">Not formatting — repositioning. See exactly what happens when we analyze a job posting against your experience.</motion.p>
+          <motion.p variants={fadeUp} className="text-[#9CA3AF] max-w-xl mx-auto">Not formatting — repositioning. See what the decoding engine does across summary, bullet, and role-framing rewrites.</motion.p>
         </motion.div>
         <div className="flex gap-1 mb-8 border-b border-[#2A3F5F]">
           {examples.map((e, i) => (
@@ -154,34 +156,40 @@ function TransformationDemo() {
 function HowItWorks() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
-  const steps = [
-    { num: "01", icon: <FileText size={20} className="text-[#C5933A]" />, title: "Upload resume + job posting", desc: "Paste or upload both. PDF, Word, or plain text.", time: "~2 min" },
-    { num: "02", icon: <Target size={20} className="text-[#C5933A]" />, title: "We decode the employer's mandate", desc: "The actual problem they're hiring to solve, capability signals, and ATS language patterns.", time: "~60 sec" },
-    { num: "03", icon: <BarChart3 size={20} className="text-[#C5933A]" />, title: "We reposition your story", desc: "Value proposition rewrite, Key Accomplishments, Mandate+Outcomes formatting, supervisory elevation.", time: "~90 sec" },
-    { num: "04", icon: <Zap size={20} className="text-[#C5933A]" />, title: "Download submission-ready materials", desc: "Resume + cover letter + ATS report. PDF, Word, or Google Doc.", time: "Instant" },
-  ];
+  const rows = ADVENTURES.map((a) => ({
+    title: a.title,
+    inputs: a.inputs,
+    outcome: a.outcome,
+  }));
   return (
     <section id="how-it-works" ref={ref} className="py-24">
       <div className="max-w-6xl mx-auto px-6">
-        <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger} className="mb-16">
+        <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger} className="mb-12 max-w-2xl">
           <motion.div variants={fadeUp} className="mb-4"><div className="gold-rule" /></motion.div>
-          <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">How it works</motion.h2>
-          <motion.p variants={fadeUp} className="text-[#9CA3AF] max-w-xl">Four steps. One session. Submission-ready by the time you finish your coffee.</motion.p>
+          <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">How each path works</motion.h2>
+          <motion.p variants={fadeUp} className="text-[#9CA3AF]">Every adventure takes only what it needs and returns a specific deliverable.</motion.p>
         </motion.div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-[#2A3F5F]">
-          {steps.map((step, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: i * 0.1 }} className="bg-[#0E1A2B] p-8 relative group hover:bg-[#152338] transition-colors">
-              <div className="text-[#2A3F5F] text-5xl font-display font-light absolute top-6 right-6 group-hover:text-[#C5933A]/20 transition-colors">{step.num}</div>
-              <div className="mb-4">{step.icon}</div>
-              <h3 className="text-[#F9F7F3] font-medium text-base mb-3 leading-snug pr-8">{step.title}</h3>
-              <p className="text-[#6B7280] text-sm leading-relaxed mb-6">{step.desc}</p>
-              <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#C5933A]" /><span className="text-[#C5933A] text-xs">{step.time}</span></div>
+        <div className="border border-[#2A3F5F]">
+          {rows.map((row, i) => (
+            <motion.div
+              key={row.title}
+              initial={{ opacity: 0, y: 16 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: i * 0.08, duration: 0.4 }}
+              className={`grid md:grid-cols-[1fr_auto_2fr] gap-4 md:gap-8 items-center p-5 ${i < rows.length - 1 ? "border-b border-[#2A3F5F]" : ""} hover:bg-[#152338]/40 transition-colors`}
+            >
+              <div>
+                <h3 className="text-[#F9F7F3] font-medium text-base leading-snug">{row.title}</h3>
+                <div className="text-[#6B7280] text-xs mt-1">You bring: <span className="text-[#9CA3AF]">{row.inputs}</span></div>
+              </div>
+              <div className="hidden md:block text-[#C5933A]/60"><ArrowRight size={16} /></div>
+              <p className="text-[#9CA3AF] text-sm leading-relaxed">{row.outcome}</p>
             </motion.div>
           ))}
         </div>
         <div className="mt-6 flex items-center justify-end gap-3">
           <div className="h-px flex-1 bg-[#2A3F5F]" />
-          <span className="text-[#6B7280] text-sm">Total: ~5 minutes</span>
+          <span className="text-[#6B7280] text-sm">Each path: 5–15 minutes</span>
         </div>
       </div>
     </section>
@@ -204,6 +212,7 @@ function ATSSection() {
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger}>
             <motion.div variants={fadeUp} className="mb-4"><div className="gold-rule" /></motion.div>
+            <motion.div variants={fadeUp} className="text-[#6B7280] text-xs font-medium tracking-wider uppercase mb-3">Inside the &ldquo;Match to a role&rdquo; path</motion.div>
             <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-6">ATS alignment,<br /><em className="text-[#C5933A] not-italic">not stuffing</em></motion.h2>
             <motion.p variants={fadeUp} className="text-[#9CA3AF] leading-relaxed mb-8">Structured alignment check across core functions, supervisory signals, and technical competencies — with exact micro-adjustments and before/after match estimates.</motion.p>
             <motion.div variants={fadeUp} className="flex items-center gap-8">
@@ -281,9 +290,50 @@ function Pricing() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const plans = [
-    { name: "Preview", price: "Free", desc: "See the full analysis. Understand exactly what's holding your resume back.", features: ["Full mandate decoding", "Strategic positioning analysis", "Draft resume preview", "ATS gap overview"], cta: "Start Free", highlight: false },
-    { name: "Executive", price: "$59", desc: "Everything for a single application. Download and submit today.", features: ["Full tailored resume", "Cover letter (2 tones)", "ATS keyword report", "PDF + Word + Google Doc", "Redline comparison"], cta: "Get Started", highlight: true },
-    { name: "Unlimited", price: "$99/mo", desc: "Every application. Version history and priority processing.", features: ["Unlimited applications", "All Executive features", "Version history", "Priority AI processing", "Early access to features"], cta: "Subscribe", highlight: false },
+    {
+      name: "Preview",
+      price: "Free",
+      desc: "Explore the platform and see real output before you pay.",
+      features: [
+        "Diagnose why you're not getting interviews",
+        "Positioning discovery (5 guided chat messages)",
+        "Full resume analysis — preview of tailored resume and cover letter",
+        "ATS keyword gap overview",
+      ],
+      cta: "Start Free",
+      ctaHref: "/#adventures",
+      highlight: false,
+    },
+    {
+      name: "Executive",
+      price: "$59",
+      desc: "Everything for a single application plus brand-building adventures.",
+      features: [
+        "Full tailored resume + cover letter (PDF + Word)",
+        "Complete ATS keyword report and redline",
+        "Unlimited guided chat sessions",
+        "Executive bio, LinkedIn summary, interview-prep stories",
+        "Modular achievement library",
+      ],
+      cta: "Get Started",
+      ctaHref: "/#adventures",
+      highlight: true,
+    },
+    {
+      name: "Unlimited",
+      price: "$99/mo",
+      desc: "Every application. Every brand asset. Priority processing.",
+      features: [
+        "Unlimited role-match applications",
+        "Everything in Executive",
+        "Board bio and speaking introductions",
+        "Version history",
+        "Priority AI processing",
+      ],
+      cta: "Subscribe",
+      ctaHref: "/#adventures",
+      highlight: false,
+    },
   ];
   return (
     <section id="pricing" ref={ref} className="py-24 bg-[#0A1421]">
@@ -291,7 +341,7 @@ function Pricing() {
         <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger} className="text-center mb-16">
           <motion.div variants={fadeUp} className="flex justify-center mb-4"><div className="gold-rule" /></motion.div>
           <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">Simple pricing</motion.h2>
-          <motion.p variants={fadeUp} className="text-[#9CA3AF]">See the output before you pay. Every time.</motion.p>
+          <motion.p variants={fadeUp} className="text-[#9CA3AF]">Every plan, every adventure — see real output before you pay.</motion.p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-px bg-[#2A3F5F]">
           {plans.map((plan, i) => (
@@ -308,7 +358,7 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Link href="/intake" className={`text-center py-3 text-sm font-semibold transition-colors block ${plan.highlight ? "bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B]" : "border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#9CA3AF] hover:text-[#F9F7F3]"}`}>
+              <Link href={plan.ctaHref} className={`text-center py-3 text-sm font-semibold transition-colors block ${plan.highlight ? "bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B]" : "border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#9CA3AF] hover:text-[#F9F7F3]"}`}>
                 {plan.cta}
               </Link>
             </motion.div>
@@ -330,11 +380,11 @@ function FinalCTA() {
           Your career deserves more<br />
           <em className="text-[#C5933A] not-italic">than a template.</em>
         </h2>
-        <p className="text-[#9CA3AF] text-lg mb-10 leading-relaxed">Upload your resume and the job posting. We&rsquo;ll show you exactly what&rsquo;s missing — and fix it.</p>
-        <Link href="/intake" className="group inline-flex items-center gap-3 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-10 py-5 text-base transition-all duration-200">
-          Begin for Free
+        <p className="text-[#9CA3AF] text-lg mb-10 leading-relaxed">Pick a path. Bring only what it needs. See real output before you pay.</p>
+        <a href="#adventures" className="group inline-flex items-center gap-3 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-10 py-5 text-base transition-all duration-200">
+          Choose your path
           <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-        </Link>
+        </a>
         <div className="flex items-center justify-center gap-6 mt-8 flex-wrap">
           <div className="flex items-center gap-2 text-[#6B7280] text-xs"><Lock size={11} /><span>Documents never stored without consent</span></div>
           <div className="flex items-center gap-2 text-[#6B7280] text-xs"><Shield size={11} /><span>Built by a recruiter. Not a template company.</span></div>
@@ -343,11 +393,13 @@ function FinalCTA() {
     </section>
   );
 }
+
 export default function Home() {
   return (
     <main>
       <Nav />
       <Hero />
+      <AdventureGrid />
       <TransformationDemo />
       <HowItWorks />
       <ATSSection />
