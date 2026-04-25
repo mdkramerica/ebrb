@@ -9,6 +9,11 @@ export const INPUT_LIMITS = {
   content: 30000,
 } as const;
 
+/** Tightened input caps applied to anonymous callers (not yet signed up). */
+export const ANON_INPUT_LIMITS = {
+  message: 2000,
+} as const;
+
 export function requireString(
   field: string,
   value: unknown,

@@ -2,18 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { SYSTEM_PROMPT } from '@/lib/prompt';
 import {
-  requireUser,
   requireAuth,
+  getOptionalUser,
   getUserTier,
-  assertTier,
-  requireConversationOwnership,
+  requireChatConversationAccess,
+  checkChatMessageCap,
 } from '@/lib/api/auth';
-import { enforceRateLimit } from '@/lib/api/rate-limit';
+import { enforceRateLimit, extractIp, hashIp } from '@/lib/api/rate-limit';
 import { getOpenAI } from '@/lib/api/openai';
-import { handleRouteError, notFound } from '@/lib/api/errors';
-import { INPUT_LIMITS, requireString, requireUuid } from '@/lib/api/validation';
+import {
+  handleRouteError,
+  notFound,
+  paymentRequired,
+  unauthorized,
+} from '@/lib/api/errors';
+import {
+  INPUT_LIMITS,
+  ANON_INPUT_LIMITS,
+  requireString,
+  requireUuid,
+} from '@/lib/api/validation';
 
 const MAX_HISTORY_TURNS = 40;
+const ANON_COOKIE = 'ebrb_anon_id';
 
 type IntentKey =
   | 'traction_diagnostic'
@@ -33,40 +44,77 @@ const INTENT_KEYWORDS: Array<{ intent: IntentKey; patterns: RegExp[] }> = [
   { intent: 'direct_improvement',       patterns: [/(?:rewrite|fix|improve|tailor|update) (?:my )?(?:resume|cv)/i, /make (?:it|my resume) better/i, /job posting/i] },
 ];
 
+const VALID_INTENTS: readonly IntentKey[] = [
+  'traction_diagnostic',
+  'differentiation_discovery',
+  'positioning_discovery',
+  'direct_improvement',
+  'career_positioning',
+  'interview_prep',
+  'general_question',
+];
+
 function classifyIntent(message: string): IntentKey {
   for (const { intent, patterns } of INTENT_KEYWORDS) {
     if (patterns.some((p) => p.test(message))) return intent;
   }
-  // Heuristic: short messages default to general_question, others to direct_improvement.
   return message.trim().length < 60 ? 'general_question' : 'direct_improvement';
+}
+
+function parsePresetIntent(raw: unknown): IntentKey | null {
+  if (typeof raw !== 'string') return null;
+  return VALID_INTENTS.includes(raw as IntentKey) ? (raw as IntentKey) : null;
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireUser();
-    const userTier = await getUserTier(user.id);
-    assertTier(userTier, 'executive');
-    await enforceRateLimit('chat', { kind: 'user', userId: user.id });
+    const user = await getOptionalUser();
+    const anonId = req.cookies.get(ANON_COOKIE)?.value ?? null;
+
+    if (!user && !anonId) {
+      throw unauthorized('Session expired. Please reload the page.');
+    }
+
+    const userTier = user ? await getUserTier(user.id) : 'anon';
+
+    if (user) {
+      await enforceRateLimit('chat', { kind: 'user', userId: user.id });
+    } else {
+      const ipHash = hashIp(extractIp(req.headers));
+      await enforceRateLimit('chat', { kind: 'ip', ipHash });
+    }
 
     const body = await req.json();
-    const message = requireString('message', body.message, {
-      min: 1,
-      max: INPUT_LIMITS.message,
-    });
+
+    const messageCap = user ? INPUT_LIMITS.message : ANON_INPUT_LIMITS.message;
+    const message = requireString('message', body.message, { min: 1, max: messageCap });
+
     const conversationId = body.conversationId
       ? requireUuid('conversationId', body.conversationId)
       : null;
 
+    // Gate: free-tier and anon capped per-conversation. Hits before we do any
+    // OpenAI work so the wall is cheap.
+    const access = await checkChatMessageCap({ conversationId, userTier });
+    if (!access.allowed) {
+      throw paymentRequired(
+        'You’ve reached the free message limit for this conversation.',
+        { wallReason: 'chat_cap', conversationId },
+      );
+    }
+
+    const presetIntent = parsePresetIntent(body.intent);
     let activeConversationId = conversationId;
     let intent: IntentKey | null = null;
 
     if (!activeConversationId) {
-      intent = classifyIntent(message);
+      intent = presetIntent ?? classifyIntent(message);
 
       const { data: conv, error: convError } = await getSupabaseAdmin()
         .from('conversations')
         .insert({
-          user_id: user.id,
+          user_id: user?.id ?? null,
+          anon_session_id: user ? null : anonId,
           intent,
           status: 'active',
         })
@@ -86,13 +134,16 @@ export async function POST(req: NextRequest) {
           conversation_id: activeConversationId,
           role: 'system',
           content: `Conversation intent detected: ${intent}. Apply the corresponding Navigator flow.`,
-          metadata: { intentDetected: intent },
+          metadata: { intentDetected: intent, presetApplied: presetIntent !== null },
         });
     } else {
-      await requireConversationOwnership(user.id, activeConversationId);
+      await requireChatConversationAccess({
+        conversationId: activeConversationId,
+        userId: user?.id ?? null,
+        anonId,
+      });
     }
 
-    // Fetch last N turns only, reversed to chronological order.
     const { data: historyRaw } = await getSupabaseAdmin()
       .from('messages')
       .select('role, content')
@@ -112,14 +163,6 @@ export async function POST(req: NextRequest) {
       }
     }
     messages.push({ role: 'user', content: message });
-
-    await getSupabaseAdmin()
-      .from('messages')
-      .insert({
-        conversation_id: activeConversationId,
-        role: 'user',
-        content: message,
-      });
 
     const stream = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1',
@@ -144,13 +187,22 @@ export async function POST(req: NextRequest) {
               );
             }
             if (chunk.choices[0]?.finish_reason) {
+              // Commit both user + assistant messages on successful completion.
+              // Failed streams don't consume a slot from the free-tier cap.
               await getSupabaseAdmin()
                 .from('messages')
-                .insert({
-                  conversation_id: activeConversationId,
-                  role: 'assistant',
-                  content: fullResponse,
-                });
+                .insert([
+                  {
+                    conversation_id: activeConversationId,
+                    role: 'user',
+                    content: message,
+                  },
+                  {
+                    conversation_id: activeConversationId,
+                    role: 'assistant',
+                    content: fullResponse,
+                  },
+                ]);
 
               await getSupabaseAdmin()
                 .from('conversations')
@@ -163,6 +215,9 @@ export async function POST(req: NextRequest) {
                     done: true,
                     conversationId: activeConversationId,
                     intent,
+                    messagesRemaining: Number.isFinite(access.messagesRemaining)
+                      ? access.messagesRemaining
+                      : null,
                   })}\n\n`,
                 ),
               );
@@ -194,29 +249,34 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET: fetch conversation history. RLS on conversations/messages enforces
-// that a user can only read rows they own, so even if the explicit user_id
-// filter was removed this query would stay safe.
+// GET: fetch conversation history. Anon callers can read conversations that
+// match their anon_session_id cookie; authed users can read their own.
 export async function GET(req: NextRequest) {
   try {
-    const { user, supabase } = await requireAuth();
-
     const { searchParams } = new URL(req.url);
     const conversationIdRaw = searchParams.get('conversationId');
 
     if (conversationIdRaw) {
       const conversationId = requireUuid('conversationId', conversationIdRaw);
+      const user = await getOptionalUser();
+      const anonId = req.cookies.get(ANON_COOKIE)?.value ?? null;
 
-      const { data: conv } = await supabase
+      await requireChatConversationAccess({
+        conversationId,
+        userId: user?.id ?? null,
+        anonId,
+      });
+
+      const admin = getSupabaseAdmin();
+
+      const { data: conv } = await admin
         .from('conversations')
         .select('id, intent, status, created_at')
         .eq('id', conversationId)
-        .eq('user_id', user.id)
         .single();
-
       if (!conv) throw notFound('Conversation not found.');
 
-      const { data: messages } = await supabase
+      const { data: messages } = await admin
         .from('messages')
         .select('id, role, content, created_at')
         .eq('conversation_id', conversationId)
@@ -229,6 +289,9 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // Listing all conversations is authenticated only — it uses the RLS-scoped
+    // client so users only see their own rows.
+    const { user, supabase } = await requireAuth();
     const { data: conversations } = await supabase
       .from('conversations')
       .select('id, intent, status, created_at, updated_at')

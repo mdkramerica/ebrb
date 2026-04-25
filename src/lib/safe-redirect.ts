@@ -9,6 +9,9 @@ export const ALLOWED_REDIRECTS: readonly string[] = [
   '/profile',
   '/chat',
   '/intake',
+  '/diagnose',
+  '/diagnose-results',
+  '/build',
 ];
 
 export function safeRedirect(raw: string | null | undefined, fallback = '/results'): string {

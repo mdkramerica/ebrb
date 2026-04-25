@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { tooManyRequests } from './errors';
 
-type Bucket = 'analyze' | 'chat' | 'refine' | 'generate-doc' | 'claim-session';
+type Bucket = 'analyze' | 'chat' | 'refine' | 'generate-doc' | 'claim-session' | 'diagnose';
 
 interface LimitConfig {
   max: number;
@@ -11,10 +11,11 @@ interface LimitConfig {
 
 const LIMITS: Record<Bucket, { user: LimitConfig; anon: LimitConfig }> = {
   analyze:         { user: { max: 10, windowSeconds: 60 }, anon: { max: 2,  windowSeconds: 3600 } },
-  chat:            { user: { max: 30, windowSeconds: 60 }, anon: { max: 0,  windowSeconds: 60   } },
+  chat:            { user: { max: 30, windowSeconds: 60 }, anon: { max: 10, windowSeconds: 3600 } },
   refine:          { user: { max: 20, windowSeconds: 60 }, anon: { max: 0,  windowSeconds: 60   } },
   'generate-doc':  { user: { max: 15, windowSeconds: 60 }, anon: { max: 0,  windowSeconds: 60   } },
   'claim-session': { user: { max: 10, windowSeconds: 60 }, anon: { max: 0,  windowSeconds: 60   } },
+  diagnose:        { user: { max: 5,  windowSeconds: 60 }, anon: { max: 2,  windowSeconds: 3600 } },
 };
 
 export function hashIp(ip: string): string {
