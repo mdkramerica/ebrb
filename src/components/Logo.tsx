@@ -13,14 +13,14 @@ export function Logo({ asLink = true }: LogoProps) {
   const body = (
     <>
       <div
-        className="w-[22px] h-[22px] border border-[#C5933A] flex items-center justify-center flex-shrink-0"
+        className="w-[22px] h-[22px] border border-[#B8893E] flex items-center justify-center flex-shrink-0"
         aria-hidden="true"
       >
-        <span className="font-display italic text-[#C5933A] text-[14px] font-medium leading-none -mt-px">
+        <span className="font-display italic text-[#B8893E] text-[14px] font-medium leading-none -mt-px">
           F
         </span>
       </div>
-      <span className="font-display italic text-[#F9F7F3] text-[17px] font-normal tracking-[0.02em] whitespace-nowrap">
+      <span className="font-display italic text-[#F4EFE3] text-[17px] font-normal tracking-[0.02em] whitespace-nowrap">
         Nilon Folio
       </span>
     </>

@@ -269,9 +269,9 @@ export default function ChatClient({
         rightContent={
           <Link
             href="/intake"
-            className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors"
+            className="text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors"
           >
-            Quick Analysis
+            Role Match
           </Link>
         }
       />
@@ -284,7 +284,7 @@ export default function ChatClient({
             </div>
             <button
               onClick={startNewConversation}
-              className="flex items-center gap-1 text-[#C5933A] hover:text-[#A67C2E] text-xs transition-colors"
+              className="flex items-center gap-1 text-[#B8893E] hover:text-[#8E6A2E] text-xs transition-colors"
             >
               <Plus size={12} /> New
             </button>
@@ -295,7 +295,7 @@ export default function ChatClient({
               <div className="text-xs text-[#4A5568] px-2 py-4 leading-relaxed">
                 <Link
                   href={loginHref}
-                  className="text-[#C5933A] hover:text-[#A67C2E] transition-colors"
+                  className="text-[#B8893E] hover:text-[#8E6A2E] transition-colors"
                 >
                   Sign in
                 </Link>{" "}
@@ -312,7 +312,7 @@ export default function ChatClient({
                   onClick={() => setActiveConversationId(conv.id)}
                   className={`w-full text-left px-3 py-2.5 rounded-sm transition-colors ${
                     activeConversationId === conv.id
-                      ? "bg-[#152338] border-l-2 border-[#C5933A]"
+                      ? "bg-[#152338] border-l-2 border-[#B8893E]"
                       : "hover:bg-[#152338]/50"
                   }`}
                 >
@@ -320,7 +320,7 @@ export default function ChatClient({
                     <MessageSquare size={10} className="text-[#6B7280] flex-shrink-0" />
                     <div
                       className={`text-xs font-medium truncate ${
-                        activeConversationId === conv.id ? "text-[#F9F7F3]" : "text-[#9CA3AF]"
+                        activeConversationId === conv.id ? "text-[#F4EFE3]" : "text-[#9CA3AF]"
                       }`}
                     >
                       {(conv.intent && INTENT_LABELS[conv.intent]) || "Guided Session"}
@@ -351,13 +351,11 @@ export default function ChatClient({
             {!activeConversationId && messages.length === 0 && (
               <div className="max-w-2xl mx-auto pt-8">
                 <div className="text-center mb-8">
-                  <h1 className="font-display text-3xl text-[#F9F7F3] font-light mb-3">
-                    Guided Session
+                  <h1 className="font-display italic text-3xl text-[#F4EFE3] font-light mb-3">
+                    Open the folio
                   </h1>
-                  <p className="text-[#9CA3AF] text-sm leading-relaxed max-w-md mx-auto">
-                    Describe your situation and the system will guide you through the right
-                    experience — from diagnosing why you&rsquo;re not getting interviews to building
-                    a complete executive résumé.
+                  <p className="font-display italic text-[#9CA3AF] text-base leading-relaxed max-w-md mx-auto">
+                    Describe your situation. From diagnosing why you&rsquo;re not getting interviews to writing your folio — Nilon takes it from there.
                   </p>
                   {!authed && (
                     <p className="text-[10px] text-[#6B7280] mt-4 uppercase tracking-wider">
@@ -373,7 +371,7 @@ export default function ChatClient({
                     <button
                       key={i}
                       onClick={() => sendMessage(prompt.label, prompt.intent)}
-                      className="w-full text-left px-4 py-3 border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors"
+                      className="w-full text-left px-4 py-3 border border-[#2A3F5F] hover:border-[#B8893E]/40 text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors"
                     >
                       {prompt.label}
                     </button>
@@ -384,7 +382,7 @@ export default function ChatClient({
 
             {loadingHistory && (
               <div className="flex items-center justify-center py-12">
-                <Loader2 size={20} className="animate-spin text-[#C5933A]" />
+                <Loader2 size={20} className="animate-spin text-[#B8893E]" />
               </div>
             )}
 
@@ -396,7 +394,7 @@ export default function ChatClient({
                 <div
                   className={`max-w-2xl ${
                     msg.role === "user"
-                      ? "bg-[#1E3049] text-[#F9F7F3] px-4 py-3 text-sm"
+                      ? "bg-[#1E3049] text-[#F4EFE3] px-4 py-3 text-sm"
                       : "text-[#E5E7EB] text-sm leading-relaxed"
                   }`}
                 >
@@ -413,7 +411,7 @@ export default function ChatClient({
               <div className="flex justify-start">
                 <div className="max-w-2xl">
                   <AssistantMarkdown content={streamingContent} />
-                  <span className="inline-block w-1.5 h-3 bg-[#C5933A] animate-pulse ml-0.5 align-middle" />
+                  <span className="inline-block w-1.5 h-3 bg-[#B8893E] animate-pulse ml-0.5 align-middle" />
                 </div>
               </div>
             )}
@@ -421,7 +419,7 @@ export default function ChatClient({
             {isStreaming && !streamingContent && (
               <div className="flex justify-start">
                 <div className="text-[#6B7280] text-xs flex items-center gap-2">
-                  <Loader2 size={12} className="animate-spin text-[#C5933A]" />
+                  <Loader2 size={12} className="animate-spin text-[#B8893E]" />
                   Thinking...
                 </div>
               </div>
@@ -439,27 +437,27 @@ export default function ChatClient({
           </div>
 
           {wallHit && (
-            <div className="border-t border-[#C5933A]/40 bg-[#152338] p-6">
+            <div className="border-t border-[#B8893E]/40 bg-[#152338] p-6">
               <div className="max-w-3xl mx-auto flex items-start gap-4">
-                <Lock size={18} className="text-[#C5933A] flex-shrink-0 mt-0.5" />
+                <Lock size={18} className="text-[#B8893E] flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="text-[#F9F7F3] font-medium mb-1">
+                  <h3 className="text-[#F4EFE3] font-medium mb-1">
                     You&rsquo;ve reached the free message limit for this conversation.
                   </h3>
                   <p className="text-[#9CA3AF] text-sm leading-relaxed mb-4">
                     Sign up to save this conversation. Upgrade to Executive for unlimited
-                    messages and downloadable documents.
+                    messages and downloadable folios.
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     <Link
                       href={signupHref}
-                      className="bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-5 py-2.5 text-sm transition-colors"
+                      className="bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B] font-semibold px-5 py-2.5 text-sm transition-colors"
                     >
                       Sign up to keep going
                     </Link>
                     <Link
                       href={loginHref}
-                      className="border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#9CA3AF] hover:text-[#F9F7F3] px-5 py-2.5 text-sm transition-colors"
+                      className="border border-[#2A3F5F] hover:border-[#B8893E]/40 text-[#9CA3AF] hover:text-[#F4EFE3] px-5 py-2.5 text-sm transition-colors"
                     >
                       Already have an account? Sign in
                     </Link>
@@ -477,22 +475,22 @@ export default function ChatClient({
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Describe your situation, paste your resume, or ask a question..."
+                  placeholder="Describe your situation, paste your résumé, or ask a question..."
                   rows={3}
                   disabled={isStreaming}
-                  className="flex-1 bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm p-3 resize-none outline-none transition-colors placeholder:text-[#4A5568] leading-relaxed disabled:opacity-50"
+                  className="flex-1 bg-[#152338] border border-[#2A3F5F] focus:border-[#B8893E]/60 text-[#F4EFE3] text-sm p-3 resize-none outline-none transition-colors placeholder:text-[#4A5568] leading-relaxed disabled:opacity-50"
                 />
                 <button
                   onClick={() => sendMessage()}
                   disabled={!input.trim() || isStreaming}
-                  className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-[#C5933A] hover:bg-[#A67C2E] disabled:opacity-40 disabled:cursor-not-allowed text-[#0E1A2B] transition-colors"
+                  className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-[#B8893E] hover:bg-[#8E6A2E] disabled:opacity-40 disabled:cursor-not-allowed text-[#0E1A2B] transition-colors"
                 >
                   <Send size={16} />
                 </button>
               </div>
               <div className="max-w-3xl mx-auto mt-2 flex items-center justify-between text-[10px] text-[#4A5568]">
                 <span>Press Enter to send · Shift+Enter for new line</span>
-                {capBannerText && <span className="text-[#C5933A]">{capBannerText}</span>}
+                {capBannerText && <span className="text-[#B8893E]">{capBannerText}</span>}
               </div>
             </div>
           )}

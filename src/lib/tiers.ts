@@ -91,7 +91,7 @@ export function getAnalysisLimit(tier: Tier | string): number {
 
 /** Human-readable labels for each extended document type */
 export const DOC_TYPE_LABELS: Record<string, string> = {
-  resume: 'Resume',
+  resume: 'Folio',
   cover_letter: 'Cover Letter',
   ats_report: 'ATS Report',
   executive_bio: 'Executive Bio',

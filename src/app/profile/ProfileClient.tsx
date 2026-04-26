@@ -46,8 +46,8 @@ interface Conversation {
 
 const TIER_STYLES = {
   free: "border border-[#2A3F5F] text-[#6B7280]",
-  executive: "border border-[#C5933A] text-[#C5933A] bg-[#C5933A]/10",
-  unlimited: "bg-[#C5933A] text-[#0E1A2B]",
+  executive: "border border-[#B8893E] text-[#B8893E] bg-[#B8893E]/10",
+  unlimited: "bg-[#B8893E] text-[#0E1A2B]",
 } as const;
 
 const INTENT_LABELS: Record<string, string> = {
@@ -110,7 +110,7 @@ export default function ProfileClient({
           <span className="text-[#9CA3AF] text-sm">{displayName}</span>
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#F9F7F3] text-xs transition-colors"
+            className="flex items-center gap-1.5 text-[#6B7280] hover:text-[#F4EFE3] text-xs transition-colors"
           >
             <LogOut size={12} />
             Sign out
@@ -121,8 +121,8 @@ export default function ProfileClient({
       {/* Content */}
       <div className="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
         <div className="flex items-center gap-3 mb-8">
-          <div className="h-px w-6 bg-[#C5933A]" />
-          <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">
+          <div className="h-px w-6 bg-[#B8893E]" />
+          <span className="text-[#B8893E] text-xs font-medium tracking-[0.2em] uppercase">
             Your Profile
           </span>
         </div>
@@ -132,9 +132,9 @@ export default function ProfileClient({
           <div className="space-y-6">
             <div className="bg-[#152338] border border-[#2A3F5F] p-6">
               <div className="w-14 h-14 bg-[#0E1A2B] border border-[#2A3F5F] flex items-center justify-center mb-4">
-                <User size={24} className="text-[#C5933A]" />
+                <User size={24} className="text-[#B8893E]" />
               </div>
-              <div className="text-[#F9F7F3] font-medium mb-1">{displayName}</div>
+              <div className="text-[#F4EFE3] font-medium mb-1">{displayName}</div>
               <div className="text-[#6B7280] text-sm mb-4">{user.email}</div>
               <div className="flex items-center gap-2 mb-4">
                 <span
@@ -156,9 +156,9 @@ export default function ProfileClient({
             <div className="space-y-2">
               <Link
                 href="/intake"
-                className="block w-full text-center text-xs text-[#C5933A] border border-[#C5933A]/30 py-2.5 hover:bg-[#C5933A]/10 transition-colors"
+                className="block w-full text-center text-xs text-[#B8893E] border border-[#B8893E]/30 py-2.5 hover:bg-[#B8893E]/10 transition-colors"
               >
-                Start new analysis →
+                Open a new folio →
               </Link>
               <Link
                 href="/chat"
@@ -171,15 +171,15 @@ export default function ProfileClient({
             {/* Upgrade stub */}
             {tier === "free" && (
               <div className="bg-[#152338] border border-[#2A3F5F] p-6">
-                <div className="text-xs text-[#C5933A] font-medium tracking-wider uppercase mb-2">
+                <div className="text-xs text-[#B8893E] font-medium tracking-wider uppercase mb-2">
                   Upgrade your plan
                 </div>
                 <p className="text-[#9CA3AF] text-sm mb-4 leading-relaxed">
-                  Get executive bio, LinkedIn summary, interview stories, guided sessions, and 5 analyses per month.
+                  Get executive bio, LinkedIn summary, interview stories, guided sessions, and 5 folios per month.
                 </p>
                 <button
                   disabled
-                  className="w-full bg-[#C5933A]/50 text-[#0E1A2B] font-semibold py-3 text-sm cursor-not-allowed"
+                  className="w-full bg-[#B8893E]/50 text-[#0E1A2B] font-semibold py-3 text-sm cursor-not-allowed"
                 >
                   Coming Soon
                 </button>
@@ -192,7 +192,7 @@ export default function ProfileClient({
             {/* Tab bar */}
             <div className="flex border-b border-[#2A3F5F] mb-6">
               {[
-                { key: "history", label: "Analysis History", icon: Clock },
+                { key: "history", label: "Past Folios", icon: Clock },
                 { key: "achievements", label: `Achievement Library${achievements.length > 0 ? ` (${achievements.length})` : ""}`, icon: BookOpen },
                 { key: "conversations", label: `Sessions${conversations.length > 0 ? ` (${conversations.length})` : ""}`, icon: MessageSquare },
               ].map(tab => (
@@ -201,7 +201,7 @@ export default function ProfileClient({
                   onClick={() => setActiveTab(tab.key as typeof activeTab)}
                   className={`flex items-center gap-1.5 px-4 py-3 text-xs font-medium border-b-2 -mb-px transition-colors ${
                     activeTab === tab.key
-                      ? "border-[#C5933A] text-[#C5933A]"
+                      ? "border-[#B8893E] text-[#B8893E]"
                       : "border-transparent text-[#6B7280] hover:text-[#9CA3AF]"
                   }`}
                 >
@@ -211,18 +211,18 @@ export default function ProfileClient({
               ))}
             </div>
 
-            {/* Analysis History */}
+            {/* Past Folios */}
             {activeTab === "history" && (
               <div>
                 {sessions.length === 0 ? (
                   <div className="bg-[#152338] border border-[#2A3F5F] p-8 text-center">
                     <FileText size={24} className="text-[#2A3F5F] mx-auto mb-3" />
-                    <p className="text-[#6B7280] text-sm mb-4">No analyses yet</p>
+                    <p className="text-[#6B7280] text-sm mb-4">No folios yet</p>
                     <Link
                       href="/intake"
-                      className="inline-block bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-6 py-2.5 text-sm transition-colors"
+                      className="inline-block bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B] font-semibold px-6 py-2.5 text-sm transition-colors"
                     >
-                      Start your first analysis
+                      Open your first folio
                     </Link>
                   </div>
                 ) : (
@@ -231,11 +231,11 @@ export default function ProfileClient({
                       <Link
                         key={s.id}
                         href={`/results?session=${s.id}`}
-                        className="block bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#C5933A]/30 transition-colors"
+                        className="block bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#B8893E]/30 transition-colors"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <p className="text-[#F9F7F3] text-sm truncate">
+                            <p className="text-[#F4EFE3] text-sm truncate">
                               {s.job_posting.slice(0, 100)}
                               {s.job_posting.length > 100 ? "..." : ""}
                             </p>
@@ -275,7 +275,7 @@ export default function ProfileClient({
                     <BookOpen size={24} className="text-[#2A3F5F] mx-auto mb-3" />
                     <p className="text-[#6B7280] text-sm mb-2">No saved achievements yet</p>
                     <p className="text-[#4A5568] text-xs leading-relaxed max-w-sm mx-auto">
-                      Strong bullets that don&apos;t fit the primary resume are automatically saved here. Run an analysis to build your library.
+                      Strong bullets that don&apos;t fit the primary folio are automatically saved here. Open a folio to build your library.
                     </p>
                   </div>
                 ) : (
@@ -286,13 +286,13 @@ export default function ProfileClient({
                         className="bg-[#152338] border border-[#2A3F5F] p-4 group"
                       >
                         <div className="flex items-start justify-between gap-4">
-                          <p className="text-[#F9F7F3] text-sm leading-relaxed flex-1">{ach.content}</p>
+                          <p className="text-[#F4EFE3] text-sm leading-relaxed flex-1">{ach.content}</p>
                           <button
                             onClick={() => copyAchievement(ach.id, ach.content)}
-                            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-[#6B7280] hover:text-[#C5933A]"
+                            className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-[#6B7280] hover:text-[#B8893E]"
                           >
                             {copiedId === ach.id ? (
-                              <CheckCircle size={14} className="text-[#3D8B5E]" />
+                              <CheckCircle size={14} className="text-[#3D5C4A]" />
                             ) : (
                               <Copy size={14} />
                             )}
@@ -326,7 +326,7 @@ export default function ProfileClient({
                     <p className="text-[#6B7280] text-sm mb-4">No guided sessions yet</p>
                     <Link
                       href="/chat"
-                      className="inline-block bg-[#152338] hover:bg-[#1E3049] border border-[#C5933A]/30 text-[#C5933A] font-medium px-6 py-2.5 text-sm transition-colors"
+                      className="inline-block bg-[#152338] hover:bg-[#1E3049] border border-[#B8893E]/30 text-[#B8893E] font-medium px-6 py-2.5 text-sm transition-colors"
                     >
                       Start a guided session
                     </Link>
@@ -337,14 +337,14 @@ export default function ProfileClient({
                       <Link
                         key={conv.id}
                         href={`/chat?conversation=${conv.id}`}
-                        className="block bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#C5933A]/30 transition-colors"
+                        className="block bg-[#152338] border border-[#2A3F5F] p-4 hover:border-[#B8893E]/30 transition-colors"
                       >
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
                             <MessageSquare size={14} className="text-[#6B7280] flex-shrink-0" />
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="text-[#F9F7F3] text-sm">
+                                <span className="text-[#F4EFE3] text-sm">
                                   {(conv.intent && INTENT_LABELS[conv.intent]) || "Guided Session"}
                                 </span>
                                 {conv.intent && INTENT_COLORS[conv.intent] && (

@@ -71,15 +71,15 @@ export default function SignupPage() {
         </div>
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="max-w-sm text-center">
-            <CheckCircle size={40} className="text-[#3D8B5E] mx-auto mb-4" />
-            <h2 className="font-display text-2xl text-[#F9F7F3] mb-3">Check your email</h2>
+            <CheckCircle size={40} className="text-[#3D5C4A] mx-auto mb-4" />
+            <h2 className="font-display text-2xl text-[#F4EFE3] mb-3">Check your email</h2>
             <p className="text-[#9CA3AF] text-sm leading-relaxed mb-6">
-              We sent a confirmation link to <strong className="text-[#F9F7F3]">{email}</strong>.
+              We sent a confirmation link to <strong className="text-[#F4EFE3]">{email}</strong>.
               Click the link to activate your account and view your results.
             </p>
             <Link
               href="/login"
-              className="text-[#C5933A] text-sm hover:underline"
+              className="text-[#B8893E] text-sm hover:underline"
             >
               Back to sign in
             </Link>
@@ -99,7 +99,7 @@ export default function SignupPage() {
       {/* Signup form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
-          <h1 className="font-display text-3xl font-light text-[#F9F7F3] text-center mb-2">
+          <h1 className="font-display text-3xl font-light text-[#F4EFE3] text-center mb-2">
             Open the folio
           </h1>
           <p className="font-display italic text-[#9CA3AF] text-base text-center mb-8">
@@ -120,7 +120,7 @@ export default function SignupPage() {
           {/* Google OAuth */}
           <button
             onClick={handleGoogleSignup}
-            className="w-full flex items-center justify-center gap-2 border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#F9F7F3] py-3 text-sm transition-colors mb-6"
+            className="w-full flex items-center justify-center gap-2 border border-[#2A3F5F] hover:border-[#B8893E]/40 text-[#F4EFE3] py-3 text-sm transition-colors mb-6"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -158,7 +158,7 @@ export default function SignupPage() {
                 autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm px-3 py-2.5 outline-none transition-colors"
+                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#B8893E]/60 text-[#F4EFE3] text-sm px-3 py-2.5 outline-none transition-colors"
                 placeholder="Alex Morgan"
               />
             </div>
@@ -171,7 +171,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm px-3 py-2.5 outline-none transition-colors"
+                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#B8893E]/60 text-[#F4EFE3] text-sm px-3 py-2.5 outline-none transition-colors"
                 placeholder="you@example.com"
               />
             </div>
@@ -185,14 +185,14 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm px-3 py-2.5 outline-none transition-colors"
+                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#B8893E]/60 text-[#F4EFE3] text-sm px-3 py-2.5 outline-none transition-colors"
                 placeholder="6+ characters"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#C5933A] hover:bg-[#A67C2E] disabled:opacity-50 text-[#0E1A2B] font-semibold py-3 text-sm transition-colors"
+              className="w-full bg-[#B8893E] hover:bg-[#8E6A2E] disabled:opacity-50 text-[#0E1A2B] font-semibold py-3 text-sm transition-colors"
             >
               {loading ? "Creating account..." : "Create account"}
             </button>
@@ -200,7 +200,7 @@ export default function SignupPage() {
 
           <p className="text-center text-[#6B7280] text-xs mt-6">
             Already have an account?{" "}
-            <Link href="/login" className="text-[#C5933A] hover:underline">
+            <Link href="/login" className="text-[#B8893E] hover:underline">
               Sign in
             </Link>
           </p>

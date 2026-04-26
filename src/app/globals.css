@@ -1,20 +1,39 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Nilon Folio palette per Brand Bible v2 §III. Variable names aliased to
+   the prior Mandate / EBRB naming (--navy, --gold, --cream) for backward
+   compatibility with the few places they're referenced; canonical brand
+   names (--ink, --midnight, --brass, --vellum, etc.) added alongside. */
 :root {
-  --navy: #0E1A2B;
-  --navy-light: #152338;
-  --navy-border: #2A3F5F;
-  --gold: #C5933A;
-  --gold-light: #E8D5A3;
-  --gold-muted: #A67C2E;
-  --cream: #F9F7F3;
-  --cream-dark: #EDE9E1;
-  --text-primary: #1A1A2E;
-  --text-muted: #6B7280;
-  --text-light: #9CA3AF;
-  --success: #3D8B5E;
-  --slate: #4A5568;
+  --ink:        #0B1320;
+  --midnight:   #0E1A2B;
+  --slate-bg:   #152338;
+  --rule:       #1F2E47;
+  --rule-hi:    #2A3F5F;
+  --paper:      #F5F1E8;
+  --bone:       #E8DFC9;
+  --vellum:     #F4EFE3;
+  --brass:      #B8893E;
+  --brass-deep: #8E6A2E;
+  --gilt:       #D9BE85;
+  --oxblood:    #5C2326;
+  --moss:       #3D5C4A;
+
+  /* Backward-compat aliases */
+  --navy:         var(--midnight);
+  --navy-light:   var(--slate-bg);
+  --navy-border:  var(--rule-hi);
+  --gold:         var(--brass);
+  --gold-light:   var(--gilt);
+  --gold-muted:   var(--brass-deep);
+  --cream:        var(--vellum);
+  --cream-dark:   #EDE9E1;
+  --text-primary: var(--ink);
+  --text-muted:   #6B7280;
+  --text-light:   #9CA3AF;
+  --success:      var(--moss);
+  --slate:        #4A5568;
 }
 
 * {

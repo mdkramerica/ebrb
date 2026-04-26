@@ -343,8 +343,8 @@ export default function ResultsPage() {
       <Nav
         rightContent={
           <div className="flex items-center gap-2">
-            <CheckCircle size={14} className="text-[#3D8B5E]" />
-            <span className="text-[#3D8B5E] text-sm">
+            <CheckCircle size={14} className="text-[#3D5C4A]" />
+            <span className="text-[#3D5C4A] text-sm">
               {isDemo ? "Demo materials" : "Materials ready"}
             </span>
           </div>
@@ -369,14 +369,14 @@ export default function ResultsPage() {
                 key={doc.key}
                 onClick={() => setActiveDoc(doc.key)}
                 className={`w-full text-left px-3 py-3 flex items-start gap-3 transition-colors ${
-                  activeDoc === doc.key ? "bg-[#152338] border-l-2 border-[#C5933A]" : "hover:bg-[#152338]/50"
+                  activeDoc === doc.key ? "bg-[#152338] border-l-2 border-[#B8893E]" : "hover:bg-[#152338]/50"
                 }`}
               >
-                <div className={`mt-0.5 ${activeDoc === doc.key ? "text-[#C5933A]" : "text-[#6B7280]"}`}>
+                <div className={`mt-0.5 ${activeDoc === doc.key ? "text-[#B8893E]" : "text-[#6B7280]"}`}>
                   <DocIcon docType={doc.key} />
                 </div>
                 <div>
-                  <div className={`text-sm ${activeDoc === doc.key ? "text-[#F9F7F3]" : "text-[#9CA3AF]"}`}>{doc.label}</div>
+                  <div className={`text-sm ${activeDoc === doc.key ? "text-[#F4EFE3]" : "text-[#9CA3AF]"}`}>{doc.label}</div>
                   <div className="text-xs text-[#6B7280]">{doc.sub}</div>
                 </div>
               </button>
@@ -395,13 +395,13 @@ export default function ResultsPage() {
                       key={doc.docType}
                       onClick={() => setActiveDoc(doc.docType)}
                       className={`w-full text-left px-3 py-2.5 flex items-start gap-3 transition-colors ${
-                        activeDoc === doc.docType ? "bg-[#152338] border-l-2 border-[#C5933A]" : "hover:bg-[#152338]/50"
+                        activeDoc === doc.docType ? "bg-[#152338] border-l-2 border-[#B8893E]" : "hover:bg-[#152338]/50"
                       }`}
                     >
-                      <div className={`mt-0.5 ${activeDoc === doc.docType ? "text-[#C5933A]" : "text-[#6B7280]"}`}>
+                      <div className={`mt-0.5 ${activeDoc === doc.docType ? "text-[#B8893E]" : "text-[#6B7280]"}`}>
                         <DocIcon docType={doc.docType} />
                       </div>
-                      <div className={`text-sm ${activeDoc === doc.docType ? "text-[#F9F7F3]" : "text-[#9CA3AF]"}`}>
+                      <div className={`text-sm ${activeDoc === doc.docType ? "text-[#F4EFE3]" : "text-[#9CA3AF]"}`}>
                         {DOC_TYPE_LABELS[doc.docType] || doc.docType}
                       </div>
                     </button>
@@ -428,14 +428,14 @@ export default function ResultsPage() {
                       title={!tierSatisfies(required) ? `Requires ${required} plan` : !currentSessionId ? "Sign in to generate" : ""}
                       className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-xs transition-colors rounded-sm ${
                         canGenerate && !generatingDoc
-                          ? "text-[#9CA3AF] hover:text-[#F9F7F3] hover:bg-[#152338]/50 border border-[#2A3F5F] hover:border-[#4A5568]"
+                          ? "text-[#9CA3AF] hover:text-[#F4EFE3] hover:bg-[#152338]/50 border border-[#2A3F5F] hover:border-[#4A5568]"
                           : "text-[#4A5568] border border-[#1E3049] cursor-not-allowed"
                       }`}
                     >
                       {isGenerating ? (
-                        <Loader2 size={12} className="animate-spin text-[#C5933A] flex-shrink-0" />
+                        <Loader2 size={12} className="animate-spin text-[#B8893E] flex-shrink-0" />
                       ) : canGenerate ? (
-                        <Plus size={12} className="flex-shrink-0 text-[#C5933A]" />
+                        <Plus size={12} className="flex-shrink-0 text-[#B8893E]" />
                       ) : (
                         <Lock size={12} className="flex-shrink-0" />
                       )}
@@ -454,16 +454,16 @@ export default function ResultsPage() {
         {/* Center: document preview */}
         <div className="flex flex-col min-h-0 overflow-hidden relative">
           <div className="flex items-center justify-between px-6 py-3 border-b border-[#2A3F5F] flex-shrink-0">
-            <div className="text-sm text-[#F9F7F3]">
+            <div className="text-sm text-[#F4EFE3]">
               {DOC_TYPE_LABELS[activeDoc] || "Preview"}
             </div>
             {user && (
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#F9F7F3] transition-colors"
+                className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#F4EFE3] transition-colors"
               >
                 {copied ? (
-                  <><CheckCircle size={12} className="text-[#3D8B5E]" /> Copied</>
+                  <><CheckCircle size={12} className="text-[#3D5C4A]" /> Copied</>
                 ) : (
                   <><Copy size={12} /> Copy text</>
                 )}
@@ -471,8 +471,8 @@ export default function ResultsPage() {
             )}
           </div>
 
-          <div className={`flex-1 overflow-auto p-6 bg-[#0A1421] ${!user && !authLoading ? "blur-sm pointer-events-none select-none" : ""}`}>
-            <div className="max-w-2xl mx-auto bg-[#F9F7F3] p-10 shadow-2xl">
+          <div className={`flex-1 overflow-auto p-6 bg-[#0B1320] ${!user && !authLoading ? "blur-sm pointer-events-none select-none" : ""}`}>
+            <div className="max-w-2xl mx-auto bg-[#F4EFE3] p-10 shadow-2xl">
               {activeDoc === "ats_report" ? (
                 <AtsReportView atsReport={atsReport} />
               ) : activeDoc === "resume" ? (
@@ -483,7 +483,7 @@ export default function ResultsPage() {
                 <pre className="text-[#1A1A2E] text-xs leading-relaxed font-mono whitespace-pre-wrap">{extendedDocs[activeDoc]}</pre>
               ) : generatingDoc === activeDoc ? (
                 <div className="flex items-center gap-3 text-[#6B7280] text-sm py-12 justify-center">
-                  <Loader2 size={16} className="animate-spin text-[#C5933A]" />
+                  <Loader2 size={16} className="animate-spin text-[#B8893E]" />
                   Generating {DOC_TYPE_LABELS[activeDoc]}...
                 </div>
               ) : (
@@ -496,24 +496,24 @@ export default function ResultsPage() {
 
           {/* Auth gate overlay */}
           {!user && !authLoading && (
-            <div className="absolute inset-0 flex items-center justify-center z-10 bg-[#0A1421]/60 backdrop-blur-[2px]">
+            <div className="absolute inset-0 flex items-center justify-center z-10 bg-[#0B1320]/60 backdrop-blur-[2px]">
               <div className="bg-[#0E1A2B] border border-[#2A3F5F] p-8 max-w-md text-center">
-                <div className="w-12 h-12 border border-[#C5933A] flex items-center justify-center mx-auto mb-4">
-                  <Lock size={20} className="text-[#C5933A]" />
+                <div className="w-12 h-12 border border-[#B8893E] flex items-center justify-center mx-auto mb-4">
+                  <Lock size={20} className="text-[#B8893E]" />
                 </div>
-                <h3 className="font-display text-2xl text-[#F9F7F3] mb-3">Your materials are ready</h3>
+                <h3 className="font-display text-2xl text-[#F4EFE3] mb-3">Your folio is ready</h3>
                 <p className="text-[#9CA3AF] text-sm mb-6 leading-relaxed">
-                  Create a free account to view your full resume, cover letter, and ATS report. Download in PDF, Word, or plain text.
+                  Create a free account to view your full folio, cover letter, and ATS report. Download in PDF, Word, or plain text.
                 </p>
                 <Link
                   href="/signup?redirect=/results"
-                  className="block w-full bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold py-3 text-sm transition-colors mb-3"
+                  className="block w-full bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B] font-semibold py-3 text-sm transition-colors mb-3"
                 >
-                  Create Free Account
+                  Open the folio
                 </Link>
                 <Link
                   href="/login?redirect=/results"
-                  className="block w-full border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#9CA3AF] hover:text-[#F9F7F3] py-3 text-sm transition-colors"
+                  className="block w-full border border-[#2A3F5F] hover:border-[#B8893E]/40 text-[#9CA3AF] hover:text-[#F4EFE3] py-3 text-sm transition-colors"
                 >
                   Already have an account? Sign in
                 </Link>
@@ -537,7 +537,7 @@ export default function ResultsPage() {
                   title={user && needsTier && !tierSatisfies("executive") ? "Requires Executive plan" : ""}
                   className={`w-full flex items-center justify-between px-3 py-3 text-left text-xs font-medium transition-colors ${
                     canDownload
-                      ? "bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B]"
+                      ? "bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B]"
                       : "bg-[#2A3F5F] text-[#6B7280] cursor-not-allowed"
                   }`}
                 >
@@ -549,10 +549,10 @@ export default function ResultsPage() {
           </div>
 
           <div className="mt-6 pt-6 border-t border-[#2A3F5F]">
-            <div className="text-xs text-[#C5933A] font-medium mb-3">Next Steps</div>
+            <div className="text-xs text-[#B8893E] font-medium mb-3">Next Steps</div>
             <Link
               href="/intake"
-              className="block w-full text-center text-xs text-[#C5933A] border border-[#C5933A]/30 py-2 hover:bg-[#C5933A]/10 transition-colors mb-2"
+              className="block w-full text-center text-xs text-[#B8893E] border border-[#B8893E]/30 py-2 hover:bg-[#B8893E]/10 transition-colors mb-2"
             >
               Analyze another job →
             </Link>

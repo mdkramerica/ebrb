@@ -32,15 +32,15 @@ export default function BuildPage() {
           </Link>
 
           <div className="flex items-center gap-3 mb-6">
-            <Award size={22} className="text-[#C5933A]" />
-            <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">
+            <Award size={22} className="text-[#B8893E]" />
+            <span className="text-[#B8893E] text-xs font-medium tracking-[0.2em] uppercase">
               Executive presence
             </span>
           </div>
 
-          <h1 className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-6 leading-tight">
+          <h1 className="font-display text-4xl md:text-5xl font-light text-[#F4EFE3] mb-6 leading-tight">
             Build your<br />
-            <em className="text-[#C5933A] not-italic">executive presence</em>
+            <em className="text-[#B8893E] not-italic">executive presence</em>
           </h1>
 
           <p className="text-[#9CA3AF] text-lg leading-relaxed mb-10">
@@ -53,15 +53,15 @@ export default function BuildPage() {
                 key={d.title}
                 className={`flex items-start gap-4 p-5 ${i < deliverables.length - 1 ? "border-b border-[#2A3F5F]" : ""}`}
               >
-                <CheckCircle size={16} className="text-[#C5933A] mt-0.5 flex-shrink-0" />
+                <CheckCircle size={16} className="text-[#B8893E] mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <div className="flex items-baseline justify-between gap-4 mb-1">
-                    <h3 className="text-[#F9F7F3] font-medium text-base">{d.title}</h3>
+                    <h3 className="text-[#F4EFE3] font-medium text-base">{d.title}</h3>
                     <span
                       className={`text-[10px] font-medium tracking-wider uppercase px-2 py-0.5 border flex-shrink-0 ${
                         d.tier === "Executive"
-                          ? "text-[#C5933A] border-[#C5933A]/40 bg-[#C5933A]/10"
-                          : "text-[#E8D5A3] border-[#E8D5A3]/40 bg-[#E8D5A3]/10"
+                          ? "text-[#B8893E] border-[#B8893E]/40 bg-[#B8893E]/10"
+                          : "text-[#D9BE85] border-[#D9BE85]/40 bg-[#D9BE85]/10"
                       }`}
                     >
                       {d.tier}
@@ -74,7 +74,7 @@ export default function BuildPage() {
           </div>
 
           <div className="bg-[#152338] border border-[#2A3F5F] p-6 mb-8">
-            <div className="text-xs text-[#C5933A] font-medium tracking-wider uppercase mb-2">
+            <div className="text-xs text-[#B8893E] font-medium tracking-wider uppercase mb-2">
               Available today
             </div>
             <p className="text-[#9CA3AF] text-sm leading-relaxed mb-5">
@@ -82,7 +82,7 @@ export default function BuildPage() {
             </p>
             <Link
               href="/intake"
-              className="group inline-flex items-center gap-2 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-6 py-3 text-sm transition-colors"
+              className="group inline-flex items-center gap-2 bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B] font-semibold px-6 py-3 text-sm transition-colors"
             >
               Start a role-match analysis
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />

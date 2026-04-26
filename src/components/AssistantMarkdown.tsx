@@ -7,26 +7,26 @@ const components: Components = {
     <p className="text-[#E5E7EB] text-sm leading-relaxed mb-3 last:mb-0">{children}</p>
   ),
   strong: ({ children }) => (
-    <strong className="text-[#F9F7F3] font-semibold">{children}</strong>
+    <strong className="text-[#F4EFE3] font-semibold">{children}</strong>
   ),
   em: ({ children }) => <em className="text-[#E5E7EB] italic">{children}</em>,
   h1: ({ children }) => (
-    <h1 className="font-display text-2xl font-light text-[#F9F7F3] mt-5 mb-3 leading-tight first:mt-0">
+    <h1 className="font-display text-2xl font-light text-[#F4EFE3] mt-5 mb-3 leading-tight first:mt-0">
       {children}
     </h1>
   ),
   h2: ({ children }) => (
-    <h2 className="font-display text-xl font-light text-[#F9F7F3] mt-5 mb-3 leading-tight first:mt-0">
+    <h2 className="font-display text-xl font-light text-[#F4EFE3] mt-5 mb-3 leading-tight first:mt-0">
       {children}
     </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="text-base font-medium text-[#F9F7F3] mt-4 mb-2 leading-snug first:mt-0">
+    <h3 className="text-base font-medium text-[#F4EFE3] mt-4 mb-2 leading-snug first:mt-0">
       {children}
     </h3>
   ),
   h4: ({ children }) => (
-    <h4 className="text-sm font-semibold text-[#F9F7F3] mt-3 mb-1.5 uppercase tracking-wider first:mt-0">
+    <h4 className="text-sm font-semibold text-[#F4EFE3] mt-3 mb-1.5 uppercase tracking-wider first:mt-0">
       {children}
     </h4>
   ),
@@ -34,7 +34,7 @@ const components: Components = {
     <ul className="list-none space-y-1.5 mb-3 last:mb-0 pl-1">{children}</ul>
   ),
   ol: ({ children }) => (
-    <ol className="list-decimal marker:text-[#C5933A] space-y-1.5 mb-3 last:mb-0 pl-5">
+    <ol className="list-decimal marker:text-[#B8893E] space-y-1.5 mb-3 last:mb-0 pl-5">
       {children}
     </ol>
   ),
@@ -50,7 +50,7 @@ const components: Components = {
       );
     }
     return (
-      <li className="text-[#E5E7EB] text-sm leading-relaxed pl-5 relative before:content-['—'] before:absolute before:left-0 before:text-[#C5933A]">
+      <li className="text-[#E5E7EB] text-sm leading-relaxed pl-5 relative before:content-['—'] before:absolute before:left-0 before:text-[#B8893E]">
         {children}
       </li>
     );
@@ -60,7 +60,7 @@ const components: Components = {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-[#C5933A] underline underline-offset-2 hover:text-[#E8D5A3] transition-colors"
+      className="text-[#B8893E] underline underline-offset-2 hover:text-[#D9BE85] transition-colors"
     >
       {children}
     </a>
@@ -69,22 +69,22 @@ const components: Components = {
     const isBlock = className?.includes("language-");
     if (isBlock) {
       return (
-        <code className="font-mono text-xs text-[#E8D5A3]">{children}</code>
+        <code className="font-mono text-xs text-[#D9BE85]">{children}</code>
       );
     }
     return (
-      <code className="font-mono text-xs text-[#C5933A] bg-[#0A1421] border border-[#2A3F5F] px-1.5 py-0.5 rounded-sm">
+      <code className="font-mono text-xs text-[#B8893E] bg-[#0B1320] border border-[#2A3F5F] px-1.5 py-0.5 rounded-sm">
         {children}
       </code>
     );
   },
   pre: ({ children }) => (
-    <pre className="bg-[#0A1421] border border-[#2A3F5F] p-3 my-3 overflow-x-auto text-xs leading-relaxed">
+    <pre className="bg-[#0B1320] border border-[#2A3F5F] p-3 my-3 overflow-x-auto text-xs leading-relaxed">
       {children}
     </pre>
   ),
   blockquote: ({ children }) => (
-    <blockquote className="border-l-2 border-[#C5933A] pl-4 my-3 italic text-[#9CA3AF]">
+    <blockquote className="border-l-2 border-[#B8893E] pl-4 my-3 italic text-[#9CA3AF]">
       {children}
     </blockquote>
   ),
@@ -95,7 +95,7 @@ const components: Components = {
     </div>
   ),
   th: ({ children }) => (
-    <th className="text-left px-3 py-2 bg-[#152338] text-[#F9F7F3] font-medium border-b border-[#2A3F5F]">
+    <th className="text-left px-3 py-2 bg-[#152338] text-[#F4EFE3] font-medium border-b border-[#2A3F5F]">
       {children}
     </th>
   ),

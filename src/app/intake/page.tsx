@@ -65,7 +65,7 @@ export default function IntakePage() {
       {/* Progress bar */}
       <div className="h-px bg-[#2A3F5F] relative">
         <motion.div
-          className="absolute inset-y-0 left-0 bg-[#C5933A]"
+          className="absolute inset-y-0 left-0 bg-[#B8893E]"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.4, ease: "easeOut" }}
@@ -75,8 +75,8 @@ export default function IntakePage() {
       {/* Mode toggle */}
       <div className="border-b border-[#2A3F5F]">
         <div className="max-w-2xl mx-auto px-6 flex">
-          <span className="flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 border-[#C5933A] text-[#C5933A] -mb-px">
-            <FileText size={12} /> Quick Analysis
+          <span className="flex items-center gap-2 px-4 py-3 text-xs font-medium border-b-2 border-[#B8893E] text-[#B8893E] -mb-px">
+            <FileText size={12} /> Role Match
           </span>
           <button
             onClick={() => router.push("/chat")}
@@ -113,7 +113,7 @@ export default function IntakePage() {
             <button
               onClick={goBack}
               disabled={step === 0}
-              className="flex items-center gap-2 text-[#6B7280] hover:text-[#F9F7F3] text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 text-[#6B7280] hover:text-[#F4EFE3] text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ArrowLeft size={14} /> Back
             </button>
@@ -121,7 +121,7 @@ export default function IntakePage() {
               <button
                 onClick={goNext}
                 disabled={!canProceed}
-                className="group flex items-center gap-2 bg-[#C5933A] hover:bg-[#A67C2E] disabled:opacity-40 disabled:cursor-not-allowed text-[#0E1A2B] font-semibold px-6 py-3 text-sm transition-all"
+                className="group flex items-center gap-2 bg-[#B8893E] hover:bg-[#8E6A2E] disabled:opacity-40 disabled:cursor-not-allowed text-[#0E1A2B] font-semibold px-6 py-3 text-sm transition-all"
               >
                 Continue <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
@@ -129,7 +129,7 @@ export default function IntakePage() {
               <button
                 onClick={handleSubmit}
                 disabled={!canProceed}
-                className="group flex items-center gap-2 bg-[#C5933A] hover:bg-[#A67C2E] disabled:opacity-40 disabled:cursor-not-allowed text-[#0E1A2B] font-semibold px-6 py-3 text-sm transition-all"
+                className="group flex items-center gap-2 bg-[#B8893E] hover:bg-[#8E6A2E] disabled:opacity-40 disabled:cursor-not-allowed text-[#0E1A2B] font-semibold px-6 py-3 text-sm transition-all"
               >
                 Analyze & Build <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
@@ -145,24 +145,24 @@ function Step0({ value, onChange }: { value: string; onChange: (v: string) => vo
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-px w-6 bg-[#C5933A]" />
-        <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">Step 1 of 3</span>
+        <div className="h-px w-6 bg-[#B8893E]" />
+        <span className="text-[#B8893E] text-xs font-medium tracking-[0.2em] uppercase">Step 1 of 3</span>
       </div>
-      <h1 className="font-display text-3xl md:text-4xl font-light text-[#F9F7F3] mb-3">The job posting</h1>
+      <h1 className="font-display text-3xl md:text-4xl font-light text-[#F4EFE3] mb-3">The job posting</h1>
       <p className="text-[#9CA3AF] text-sm mb-8 leading-relaxed">
         Paste the full job description. Include the job title, responsibilities, qualifications, and any ID numbers. The more complete, the better our analysis.
       </p>
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <label className="text-[#6B7280] text-xs font-medium tracking-wider uppercase">Paste job posting</label>
-          {value.length > 0 && <span className="text-[#C5933A] text-xs">{value.length} characters</span>}
+          {value.length > 0 && <span className="text-[#B8893E] text-xs">{value.length} characters</span>}
         </div>
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Paste the full job description here..."
           rows={12}
-          className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm p-4 resize-none outline-none transition-colors placeholder:text-[#4A5568] leading-relaxed"
+          className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#B8893E]/60 text-[#F4EFE3] text-sm p-4 resize-none outline-none transition-colors placeholder:text-[#4A5568] leading-relaxed"
         />
       </div>
       <div className="flex items-center gap-3 text-[#4A5568] text-xs">
@@ -177,24 +177,24 @@ function Step1({ value, onChange }: { value: string; onChange: (v: string) => vo
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-px w-6 bg-[#C5933A]" />
-        <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">Step 2 of 3</span>
+        <div className="h-px w-6 bg-[#B8893E]" />
+        <span className="text-[#B8893E] text-xs font-medium tracking-[0.2em] uppercase">Step 2 of 3</span>
       </div>
-      <h1 className="font-display text-3xl md:text-4xl font-light text-[#F9F7F3] mb-3">Your resume</h1>
+      <h1 className="font-display text-3xl md:text-4xl font-light text-[#F4EFE3] mb-3">Your resume</h1>
       <p className="text-[#9CA3AF] text-sm mb-8 leading-relaxed">
         Paste your current resume as plain text. Don&rsquo;t worry about formatting — we&rsquo;ll handle that. We need the content: your experience, accomplishments, and credentials.
       </p>
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <label className="text-[#6B7280] text-xs font-medium tracking-wider uppercase">Paste your resume</label>
-          {value.length > 0 && <span className="text-[#C5933A] text-xs">{value.length} characters</span>}
+          {value.length > 0 && <span className="text-[#B8893E] text-xs">{value.length} characters</span>}
         </div>
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Paste your resume content here..."
           rows={12}
-          className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm p-4 resize-none outline-none transition-colors placeholder:text-[#4A5568] leading-relaxed"
+          className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#B8893E]/60 text-[#F4EFE3] text-sm p-4 resize-none outline-none transition-colors placeholder:text-[#4A5568] leading-relaxed"
         />
       </div>
       <div className="flex items-center gap-3 text-[#4A5568] text-xs">
@@ -209,10 +209,10 @@ function Step2({ form, setForm }: { form: FormData; setForm: React.Dispatch<Reac
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-px w-6 bg-[#C5933A]" />
-        <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">Step 3 of 3</span>
+        <div className="h-px w-6 bg-[#B8893E]" />
+        <span className="text-[#B8893E] text-xs font-medium tracking-[0.2em] uppercase">Step 3 of 3</span>
       </div>
-      <h1 className="font-display text-3xl md:text-4xl font-light text-[#F9F7F3] mb-3">Preferences</h1>
+      <h1 className="font-display text-3xl md:text-4xl font-light text-[#F4EFE3] mb-3">Preferences</h1>
       <p className="text-[#9CA3AF] text-sm mb-10 leading-relaxed">
         Two quick choices that shape your output. You can always change these and regenerate.
       </p>
@@ -229,9 +229,9 @@ function Step2({ form, setForm }: { form: FormData; setForm: React.Dispatch<Reac
             <button
               key={t.val}
               onClick={() => setForm((f) => ({ ...f, tone: t.val }))}
-              className={`p-4 border text-left transition-all ${form.tone === t.val ? "border-[#C5933A] bg-[#C5933A]/10" : "border-[#2A3F5F] hover:border-[#4A5568]"}`}
+              className={`p-4 border text-left transition-all ${form.tone === t.val ? "border-[#B8893E] bg-[#B8893E]/10" : "border-[#2A3F5F] hover:border-[#4A5568]"}`}
             >
-              <div className={`text-sm font-medium mb-1 ${form.tone === t.val ? "text-[#C5933A]" : "text-[#F9F7F3]"}`}>{t.label}</div>
+              <div className={`text-sm font-medium mb-1 ${form.tone === t.val ? "text-[#B8893E]" : "text-[#F4EFE3]"}`}>{t.label}</div>
               <div className="text-[#6B7280] text-xs">{t.desc}</div>
             </button>
           ))}
@@ -249,9 +249,9 @@ function Step2({ form, setForm }: { form: FormData; setForm: React.Dispatch<Reac
             <button
               key={c.val}
               onClick={() => setForm((f) => ({ ...f, context: c.val }))}
-              className={`p-4 border text-left transition-all ${form.context === c.val ? "border-[#C5933A] bg-[#C5933A]/10" : "border-[#2A3F5F] hover:border-[#4A5568]"}`}
+              className={`p-4 border text-left transition-all ${form.context === c.val ? "border-[#B8893E] bg-[#B8893E]/10" : "border-[#2A3F5F] hover:border-[#4A5568]"}`}
             >
-              <div className={`text-sm font-medium mb-1 ${form.context === c.val ? "text-[#C5933A]" : "text-[#F9F7F3]"}`}>{c.label}</div>
+              <div className={`text-sm font-medium mb-1 ${form.context === c.val ? "text-[#B8893E]" : "text-[#F4EFE3]"}`}>{c.label}</div>
               <div className="text-[#6B7280] text-xs">{c.desc}</div>
             </button>
           ))}
@@ -263,20 +263,20 @@ function Step2({ form, setForm }: { form: FormData; setForm: React.Dispatch<Reac
         <div className="text-[#6B7280] text-xs font-medium tracking-wider uppercase mb-4">Output Package</div>
         <div className="space-y-2">
           {([
-            { val: "resume", label: "Resume only", desc: "Tailored resume, PDF + Word" },
-            { val: "both", label: "Resume + Cover Letter", desc: "Includes two tone variants of the cover letter" },
-            { val: "full", label: "Full Package", desc: "Resume + Cover Letter + ATS Keyword Report" },
+            { val: "resume", label: "Folio only", desc: "Decision-ready folio, PDF + Word" },
+            { val: "both", label: "Folio + Cover Letter", desc: "Includes two tone variants of the cover letter" },
+            { val: "full", label: "Full Package", desc: "Folio + Cover Letter + ATS Keyword Report" },
           ] as const).map((o) => (
             <button
               key={o.val}
               onClick={() => setForm((f) => ({ ...f, output: o.val }))}
-              className={`w-full p-4 border text-left flex items-center justify-between transition-all ${form.output === o.val ? "border-[#C5933A] bg-[#C5933A]/10" : "border-[#2A3F5F] hover:border-[#4A5568]"}`}
+              className={`w-full p-4 border text-left flex items-center justify-between transition-all ${form.output === o.val ? "border-[#B8893E] bg-[#B8893E]/10" : "border-[#2A3F5F] hover:border-[#4A5568]"}`}
             >
               <div>
-                <div className={`text-sm font-medium ${form.output === o.val ? "text-[#C5933A]" : "text-[#F9F7F3]"}`}>{o.label}</div>
+                <div className={`text-sm font-medium ${form.output === o.val ? "text-[#B8893E]" : "text-[#F4EFE3]"}`}>{o.label}</div>
                 <div className="text-[#6B7280] text-xs mt-0.5">{o.desc}</div>
               </div>
-              <div className={`w-3 h-3 border flex-shrink-0 ${form.output === o.val ? "border-[#C5933A] bg-[#C5933A]" : "border-[#4A5568]"}`} />
+              <div className={`w-3 h-3 border flex-shrink-0 ${form.output === o.val ? "border-[#B8893E] bg-[#B8893E]" : "border-[#4A5568]"}`} />
             </button>
           ))}
         </div>

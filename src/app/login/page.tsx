@@ -60,7 +60,7 @@ export default function LoginPage() {
       {/* Login form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
-          <h1 className="font-display text-3xl font-light text-[#F9F7F3] text-center mb-2">
+          <h1 className="font-display text-3xl font-light text-[#F4EFE3] text-center mb-2">
             Welcome back
           </h1>
           <p className="text-[#6B7280] text-sm text-center mb-8">
@@ -81,7 +81,7 @@ export default function LoginPage() {
           {/* Google OAuth */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-2 border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#F9F7F3] py-3 text-sm transition-colors mb-6"
+            className="w-full flex items-center justify-center gap-2 border border-[#2A3F5F] hover:border-[#B8893E]/40 text-[#F4EFE3] py-3 text-sm transition-colors mb-6"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -121,7 +121,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm px-3 py-2.5 outline-none transition-colors"
+                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#B8893E]/60 text-[#F4EFE3] text-sm px-3 py-2.5 outline-none transition-colors"
                 placeholder="you@example.com"
               />
             </div>
@@ -135,14 +135,14 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#C5933A]/60 text-[#F9F7F3] text-sm px-3 py-2.5 outline-none transition-colors"
+                className="w-full bg-[#152338] border border-[#2A3F5F] focus:border-[#B8893E]/60 text-[#F4EFE3] text-sm px-3 py-2.5 outline-none transition-colors"
                 placeholder="••••••••"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#C5933A] hover:bg-[#A67C2E] disabled:opacity-50 text-[#0E1A2B] font-semibold py-3 text-sm transition-colors"
+              className="w-full bg-[#B8893E] hover:bg-[#8E6A2E] disabled:opacity-50 text-[#0E1A2B] font-semibold py-3 text-sm transition-colors"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
@@ -150,7 +150,7 @@ export default function LoginPage() {
 
           <p className="text-center text-[#6B7280] text-xs mt-6">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-[#C5933A] hover:underline">
+            <Link href="/signup" className="text-[#B8893E] hover:underline">
               Sign up
             </Link>
           </p>

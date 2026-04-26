@@ -26,7 +26,7 @@ const ANALYSIS_STEPS: AnalysisStep[] = [
   { id: "supervisory",    label: "Elevating supervisory language",      detail: "Surfacing leadership, management, and direction experience explicitly...", duration: 800  },
   { id: "ats",            label: "Running ATS keyword alignment",       detail: "Mapping before/after match percentages across core functions...",         duration: 1000 },
   { id: "cover",          label: "Generating cover letter",            detail: "Writing role-specific letter with correct tone and positioning...",        duration: 1200 },
-  { id: "final",          label: "Finalizing your materials",          detail: "Formatting and preparing submission-ready documents...",                   duration: 600  },
+  { id: "final",          label: "Finalizing your folio",              detail: "Formatting and preparing the decision-ready package...",                    duration: 600  },
 ];
 
 const INSIGHTS = [
@@ -138,9 +138,9 @@ export default function ProcessPage() {
       <div className="min-h-screen bg-[#0E1A2B] flex items-center justify-center px-6">
         <div className="max-w-md text-center">
           <AlertCircle size={40} className="text-red-400 mx-auto mb-4" />
-          <h2 className="font-display text-2xl text-[#F9F7F3] mb-3">Something went wrong</h2>
+          <h2 className="font-display text-2xl text-[#F4EFE3] mb-3">Something went wrong</h2>
           <p className="text-[#9CA3AF] mb-6 text-sm leading-relaxed">{error}</p>
-          <Link href="/intake" className="bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-6 py-3 text-sm transition-colors inline-block">
+          <Link href="/intake" className="bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B] font-semibold px-6 py-3 text-sm transition-colors inline-block">
             Go Back
           </Link>
         </div>
@@ -159,7 +159,7 @@ export default function ProcessPage() {
       {/* Progress bar */}
       <div className="h-px bg-[#2A3F5F] relative">
         <motion.div
-          className="absolute inset-y-0 left-0 bg-[#C5933A]"
+          className="absolute inset-y-0 left-0 bg-[#B8893E]"
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.4 }}
         />
@@ -169,10 +169,10 @@ export default function ProcessPage() {
         {/* Left: analysis log */}
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-px w-6 bg-[#C5933A]" />
-            <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">Analysis in progress</span>
+            <div className="h-px w-6 bg-[#B8893E]" />
+            <span className="text-[#B8893E] text-xs font-medium tracking-[0.2em] uppercase">Analysis in progress</span>
           </div>
-          <h2 className="font-display text-2xl font-light text-[#F9F7F3] mb-8">Building your executive materials</h2>
+          <h2 className="font-display text-2xl font-light text-[#F4EFE3] mb-8">Building your executive materials</h2>
 
           <div className="space-y-3">
             {ANALYSIS_STEPS.map((step) => {
@@ -185,26 +185,26 @@ export default function ProcessPage() {
                 >
                   <div className="mt-0.5 flex-shrink-0">
                     {status === "done" ? (
-                      <CheckCircle size={14} className="text-[#3D8B5E]" />
+                      <CheckCircle size={14} className="text-[#3D5C4A]" />
                     ) : status === "running" ? (
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-3.5 h-3.5 border border-[#C5933A] border-t-transparent rounded-full"
+                        className="w-3.5 h-3.5 border border-[#B8893E] border-t-transparent rounded-full"
                       />
                     ) : (
                       <Circle size={14} className="text-[#2A3F5F]" />
                     )}
                   </div>
                   <div>
-                    <div className={`text-sm ${status === "done" ? "text-[#6B7280]" : status === "running" ? "text-[#F9F7F3]" : "text-[#2A3F5F]"}`}>
+                    <div className={`text-sm ${status === "done" ? "text-[#6B7280]" : status === "running" ? "text-[#F4EFE3]" : "text-[#2A3F5F]"}`}>
                       {step.label}
                     </div>
                     {status === "running" && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        className="text-xs text-[#C5933A]/70 mt-0.5"
+                        className="text-xs text-[#B8893E]/70 mt-0.5"
                       >
                         {step.detail}
                       </motion.div>
@@ -220,7 +220,7 @@ export default function ProcessPage() {
         <div className="space-y-5">
           {/* Insight */}
           <div className="bg-[#152338] border border-[#2A3F5F] p-6">
-            <div className="text-xs text-[#C5933A] font-medium tracking-wider uppercase mb-3">Recruiter insight</div>
+            <div className="text-xs text-[#B8893E] font-medium tracking-wider uppercase mb-3">Recruiter insight</div>
             <AnimatePresence mode="wait">
               <motion.p
                 key={currentInsight}
@@ -239,7 +239,7 @@ export default function ProcessPage() {
           </div>
 
           {/* What you'll receive */}
-          <div className="bg-[#0A1421] border border-[#2A3F5F] p-6">
+          <div className="bg-[#0B1320] border border-[#2A3F5F] p-6">
             <div className="text-xs text-[#6B7280] font-medium tracking-wider uppercase mb-4">You&rsquo;ll receive</div>
             <ul className="space-y-2.5">
               {[
@@ -251,7 +251,7 @@ export default function ProcessPage() {
                 "PDF, Word, and Google Doc export",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
-                  <CheckCircle size={12} className="text-[#C5933A] mt-0.5 flex-shrink-0" />
+                  <CheckCircle size={12} className="text-[#B8893E] mt-0.5 flex-shrink-0" />
                   <span className="text-[#9CA3AF] text-xs">{item}</span>
                 </li>
               ))}
@@ -268,7 +268,7 @@ export default function ProcessPage() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                className="w-4 h-4 border border-[#C5933A] border-t-transparent rounded-full flex-shrink-0"
+                className="w-4 h-4 border border-[#B8893E] border-t-transparent rounded-full flex-shrink-0"
               />
               <span className="text-[#9CA3AF] text-xs">Finalizing your documents...</span>
             </motion.div>
@@ -280,10 +280,10 @@ export default function ProcessPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-[#3D8B5E]/10 border border-[#3D8B5E]/40 p-6 text-center"
+                className="bg-[#3D5C4A]/10 border border-[#3D5C4A]/40 p-6 text-center"
               >
-                <CheckCircle size={24} className="text-[#3D8B5E] mx-auto mb-3" />
-                <div className="text-[#F9F7F3] font-medium mb-1">Your materials are ready</div>
+                <CheckCircle size={24} className="text-[#3D5C4A] mx-auto mb-3" />
+                <div className="text-[#F4EFE3] font-medium mb-1">Your materials are ready</div>
                 <div className="text-[#6B7280] text-xs">Taking you to your results...</div>
               </motion.div>
             )}

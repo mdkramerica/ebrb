@@ -18,7 +18,7 @@ export function Nav({ rightContent }: { rightContent?: React.ReactNode }) {
             <Link
               href="/profile"
               aria-label="Profile"
-              className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors"
+              className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors"
             >
               <User size={14} aria-hidden="true" />
               <span className="hidden sm:inline">
@@ -28,7 +28,7 @@ export function Nav({ rightContent }: { rightContent?: React.ReactNode }) {
           ) : (
             <Link
               href="/login"
-              className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors"
+              className="text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors"
             >
               Sign in
             </Link>

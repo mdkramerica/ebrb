@@ -9,7 +9,7 @@ export const ADVENTURES: Adventure[] = [
   {
     id: "match",
     title: "Match me to a specific role",
-    outcome: "Tailored resume, cover letter, ATS report, and a redline showing exactly what changed and why.",
+    outcome: "Decision-ready folio, cover letter, ATS report, and a redline showing exactly what changed and why.",
     inputs: "Resume + job posting",
     tier: "free-preview",
     href: "/intake",
@@ -28,7 +28,7 @@ export const ADVENTURES: Adventure[] = [
   {
     id: "pitch",
     title: "Figure out how to pitch myself",
-    outcome: "A guided conversation that surfaces your value proposition — what you reliably deliver, what you're hired to fix.",
+    outcome: "A guided conversation that surfaces your argument — what you reliably deliver, what you're hired to fix.",
     inputs: "Just a conversation",
     tier: "free",
     href: "/chat?intent=positioning_discovery",
@@ -37,7 +37,7 @@ export const ADVENTURES: Adventure[] = [
   {
     id: "presence",
     title: "Build my executive presence",
-    outcome: "Executive bio, LinkedIn summary, board bio, and speaking introductions — built from your resume.",
+    outcome: "Executive bio, LinkedIn summary, board bio, and speaking introductions — built from your folio.",
     inputs: "Resume",
     tier: "executive",
     href: "/build",
@@ -68,7 +68,7 @@ export function AdventureGrid({ id = "adventures" }: { id?: string }) {
           <div className="mb-4">
             <div className="gold-rule" />
           </div>
-          <h2 className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">
+          <h2 className="font-display text-4xl md:text-5xl font-light text-[#F4EFE3] mb-4">
             Where are you stuck?
           </h2>
           <p className="font-display italic text-[#9CA3AF] text-lg leading-relaxed">
@@ -90,7 +90,7 @@ export function AdventureGrid({ id = "adventures" }: { id?: string }) {
           <span className="text-[#6B7280]">Not sure where to start?</span>
           <Link
             href="/chat"
-            className="group inline-flex items-center gap-1.5 text-[#C5933A] hover:text-[#E8D5A3] transition-colors"
+            className="group inline-flex items-center gap-1.5 text-[#B8893E] hover:text-[#D9BE85] transition-colors"
           >
             Start a guided conversation
             <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
@@ -105,7 +105,7 @@ export function AdventureGridCompact({ title = "Start a new adventure" }: { titl
   return (
     <section className="py-8">
       <div className="mb-6">
-        <h2 className="font-display text-2xl font-light text-[#F9F7F3]">{title}</h2>
+        <h2 className="font-display text-2xl font-light text-[#F4EFE3]">{title}</h2>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
         {ADVENTURES.map((adventure) => (

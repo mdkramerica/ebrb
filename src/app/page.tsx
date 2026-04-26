@@ -27,10 +27,10 @@ function Nav() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Logo />
         <div className="hidden md:flex items-center gap-8">
-          <a href="#adventures" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">Paths</a>
-          <a href="#how-it-works" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">How It Works</a>
-          <a href="#about" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">About</a>
-          <a href="#pricing" className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">Pricing</a>
+          <a href="#adventures" className="text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors">Paths</a>
+          <a href="#how-it-works" className="text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors">How It Works</a>
+          <a href="#about" className="text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors">About</a>
+          <a href="#pricing" className="text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors">Pricing</a>
         </div>
         <div className="flex items-center gap-4">
           {!loading && (
@@ -38,7 +38,7 @@ function Nav() {
               <Link
                 href="/profile"
                 aria-label="Profile"
-                className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors"
+                className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors"
               >
                 <User size={14} aria-hidden="true" />
                 <span className="hidden sm:inline">{user.email?.split("@")[0]}</span>
@@ -46,13 +46,13 @@ function Nav() {
             ) : (
               <Link
                 href="/login"
-                className="text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors"
+                className="text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors"
               >
                 Sign in
               </Link>
             )
           )}
-          <Link href="/#adventures" className="bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] text-sm font-semibold px-5 py-2 transition-colors">
+          <Link href="/#adventures" className="bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B] text-sm font-semibold px-5 py-2 transition-colors">
             Open the folio
           </Link>
         </div>
@@ -64,35 +64,35 @@ function Nav() {
 function Hero() {
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#C5933A 1px, transparent 1px), linear-gradient(90deg, #C5933A 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#C5933A]/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#B8893E 1px, transparent 1px), linear-gradient(90deg, #B8893E 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#B8893E]/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="relative z-10 max-w-6xl mx-auto px-6 pt-24 pb-16">
         <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-4xl">
           <motion.div variants={fadeUp} className="flex items-center gap-3 mb-8">
-            <div className="h-px w-8 bg-[#C5933A]" />
-            <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">Built by a recruiter. Powered by AI.</span>
+            <div className="h-px w-8 bg-[#B8893E]" />
+            <span className="text-[#B8893E] text-xs font-medium tracking-[0.2em] uppercase">Built by a recruiter. Powered by AI.</span>
           </motion.div>
-          <motion.h1 variants={fadeUp} className="font-display text-5xl md:text-7xl font-light text-[#F9F7F3] leading-[0.95] mb-6 tracking-tight">
+          <motion.h1 variants={fadeUp} className="font-display text-5xl md:text-7xl font-light text-[#F4EFE3] leading-[0.95] mb-6 tracking-tight">
             Every executive has<br />
-            a <em className="text-[#C5933A] italic font-normal">folio.</em><br />
+            a <em className="text-[#B8893E] italic font-normal">folio.</em><br />
             Nilon writes yours.
           </motion.h1>
           <motion.p variants={fadeUp} className="font-display italic text-[#9CA3AF] text-xl md:text-2xl font-light leading-relaxed mb-10 max-w-2xl">
             For Director through C-Suite executives. Decision-ready in minutes. Built on thirty years of executive search.
           </motion.p>
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <a href="#adventures" className="group flex items-center gap-2 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-8 py-4 text-sm tracking-wide transition-all duration-200">
+            <a href="#adventures" className="group flex items-center gap-2 bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B] font-semibold px-8 py-4 text-sm tracking-wide transition-all duration-200">
               Open the folio
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </a>
-            <a href="#how-it-works" className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">
+            <a href="#how-it-works" className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F4EFE3] text-sm transition-colors">
               How it works <ChevronDown size={14} />
             </a>
           </motion.div>
           <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-6 mt-12 pt-12 border-t border-[#2A3F5F]">
             {["30 yrs exec search", "Director → C-Suite", "93% ATS match", "Decision-ready"].map((s) => (
               <div key={s} className="flex items-center gap-2">
-                <CheckCircle size={13} className="text-[#C5933A]" />
+                <CheckCircle size={13} className="text-[#B8893E]" />
                 <span className="text-[#9CA3AF] text-xs">{s}</span>
               </div>
             ))}
@@ -118,16 +118,16 @@ function TransformationDemo() {
     { label: "Role framing", before: "MDH Epidemiologist (2021–Present)\n• Conducted outbreak investigations\n• Provided consultation to partners\n• Supervised students", insight: "Task list. No mandate, no scope indicators, no supervisory authority stated explicitly. Reads as individual contributor.", after: "Mandate: Provide field epidemiology leadership for 12 rural counties and three tribal nations, directing surveillance systems and advancing statewide disease prevention strategy aligned with IDEPC priorities." },
   ];
   return (
-    <section ref={ref} className="py-24 bg-[#0A1421]">
+    <section ref={ref} className="py-24 bg-[#0B1320]">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger} className="text-center mb-16">
           <motion.div variants={fadeUp} className="flex justify-center mb-4"><div className="gold-rule" /></motion.div>
-          <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">What actually changes</motion.h2>
+          <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F4EFE3] mb-4">What actually changes</motion.h2>
           <motion.p variants={fadeUp} className="text-[#9CA3AF] max-w-xl mx-auto">Not formatting — repositioning. See what the decoding engine does across summary, bullet, and role-framing rewrites.</motion.p>
         </motion.div>
         <div className="flex gap-1 mb-8 border-b border-[#2A3F5F]">
           {examples.map((e, i) => (
-            <button key={i} onClick={() => setActive(i)} className={`px-5 py-3 text-sm transition-colors ${active === i ? "text-[#C5933A] border-b-2 border-[#C5933A] -mb-px" : "text-[#6B7280] hover:text-[#9CA3AF]"}`}>
+            <button key={i} onClick={() => setActive(i)} className={`px-5 py-3 text-sm transition-colors ${active === i ? "text-[#B8893E] border-b-2 border-[#B8893E] -mb-px" : "text-[#6B7280] hover:text-[#9CA3AF]"}`}>
               {e.label}
             </button>
           ))}
@@ -138,14 +138,14 @@ function TransformationDemo() {
             <p className="text-[#9CA3AF] text-sm leading-relaxed whitespace-pre-line">{examples[active].before}</p>
           </div>
           <div className="bg-[#0E1A2B] p-6 relative">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C5933A] to-transparent" />
-            <div className="flex items-center gap-2 mb-3"><Target size={12} className="text-[#C5933A]" /><div className="text-xs text-[#C5933A] font-medium tracking-wider uppercase">What we decoded</div></div>
-            <p className="text-[#E8D5A3] text-sm leading-relaxed italic">{examples[active].insight}</p>
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#B8893E] to-transparent" />
+            <div className="flex items-center gap-2 mb-3"><Target size={12} className="text-[#B8893E]" /><div className="text-xs text-[#B8893E] font-medium tracking-wider uppercase">What we decoded</div></div>
+            <p className="text-[#D9BE85] text-sm leading-relaxed italic">{examples[active].insight}</p>
           </div>
           <div className="bg-[#152338] p-6 relative">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#3D8B5E] to-transparent" />
-            <div className="flex items-center gap-2 mb-3"><CheckCircle size={12} className="text-[#3D8B5E]" /><div className="text-xs text-[#3D8B5E] font-medium tracking-wider uppercase">After</div></div>
-            <p className="text-[#F9F7F3] text-sm leading-relaxed whitespace-pre-line">{examples[active].after}</p>
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#3D5C4A] to-transparent" />
+            <div className="flex items-center gap-2 mb-3"><CheckCircle size={12} className="text-[#3D5C4A]" /><div className="text-xs text-[#3D5C4A] font-medium tracking-wider uppercase">After</div></div>
+            <p className="text-[#F4EFE3] text-sm leading-relaxed whitespace-pre-line">{examples[active].after}</p>
           </div>
         </motion.div>
       </div>
@@ -166,7 +166,7 @@ function HowItWorks() {
       <div className="max-w-6xl mx-auto px-6">
         <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger} className="mb-12 max-w-2xl">
           <motion.div variants={fadeUp} className="mb-4"><div className="gold-rule" /></motion.div>
-          <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">How each path works</motion.h2>
+          <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F4EFE3] mb-4">How each path works</motion.h2>
           <motion.p variants={fadeUp} className="text-[#9CA3AF]">Every adventure takes only what it needs and returns a specific deliverable.</motion.p>
         </motion.div>
         <div className="border border-[#2A3F5F]">
@@ -179,10 +179,10 @@ function HowItWorks() {
               className={`grid md:grid-cols-[1fr_auto_2fr] gap-4 md:gap-8 items-center p-5 ${i < rows.length - 1 ? "border-b border-[#2A3F5F]" : ""} hover:bg-[#152338]/40 transition-colors`}
             >
               <div>
-                <h3 className="text-[#F9F7F3] font-medium text-base leading-snug">{row.title}</h3>
+                <h3 className="text-[#F4EFE3] font-medium text-base leading-snug">{row.title}</h3>
                 <div className="text-[#6B7280] text-xs mt-1">You bring: <span className="text-[#9CA3AF]">{row.inputs}</span></div>
               </div>
-              <div className="hidden md:block text-[#C5933A]/60"><ArrowRight size={16} /></div>
+              <div className="hidden md:block text-[#B8893E]/60"><ArrowRight size={16} /></div>
               <p className="text-[#9CA3AF] text-sm leading-relaxed">{row.outcome}</p>
             </motion.div>
           ))}
@@ -207,31 +207,31 @@ function ATSSection() {
     { label: "Direct staff", status: "partial" }, { label: "Statewide coordination", status: "partial" },
   ];
   return (
-    <section ref={ref} className="py-24 bg-[#0A1421]">
+    <section ref={ref} className="py-24 bg-[#0B1320]">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger}>
             <motion.div variants={fadeUp} className="mb-4"><div className="gold-rule" /></motion.div>
             <motion.div variants={fadeUp} className="text-[#6B7280] text-xs font-medium tracking-wider uppercase mb-3">Inside the &ldquo;Match to a role&rdquo; path</motion.div>
-            <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-6">ATS alignment,<br /><em className="text-[#C5933A] not-italic">not stuffing</em></motion.h2>
+            <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F4EFE3] mb-6">ATS alignment,<br /><em className="text-[#B8893E] not-italic">not stuffing</em></motion.h2>
             <motion.p variants={fadeUp} className="text-[#9CA3AF] leading-relaxed mb-8">Structured alignment check across core functions, supervisory signals, and technical competencies — with exact micro-adjustments and before/after match estimates.</motion.p>
             <motion.div variants={fadeUp} className="flex items-center gap-8">
               <div><div className="text-4xl font-display font-light text-[#6B7280]">82%</div><div className="text-[#6B7280] text-xs mt-1">Before</div></div>
-              <div className="h-px flex-1 bg-[#2A3F5F] relative overflow-hidden"><div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#6B7280] to-[#C5933A]" style={{ width: "75%" }} /></div>
-              <div><div className="text-4xl font-display font-light text-[#3D8B5E]">93%</div><div className="text-[#6B7280] text-xs mt-1">After</div></div>
+              <div className="h-px flex-1 bg-[#2A3F5F] relative overflow-hidden"><div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#6B7280] to-[#B8893E]" style={{ width: "75%" }} /></div>
+              <div><div className="text-4xl font-display font-light text-[#3D5C4A]">93%</div><div className="text-[#6B7280] text-xs mt-1">After</div></div>
             </motion.div>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 24 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.6, delay: 0.2 }} className="bg-[#152338] border border-[#2A3F5F] p-6">
             <div className="text-xs text-[#6B7280] font-medium tracking-wider uppercase mb-4">Keyword Alignment Report</div>
             <div className="flex flex-wrap gap-2">
               {keywords.map((k) => (
-                <span key={k.label} className={`text-xs px-3 py-1.5 border ${k.status === "strong" ? "border-[#3D8B5E]/40 text-[#3D8B5E] bg-[#3D8B5E]/10" : k.status === "partial" ? "border-[#C5933A]/40 text-[#C5933A] bg-[#C5933A]/10" : "border-[#4A5568]/40 text-[#6B7280] bg-[#2A3F5F]/30"}`}>
+                <span key={k.label} className={`text-xs px-3 py-1.5 border ${k.status === "strong" ? "border-[#3D5C4A]/40 text-[#3D5C4A] bg-[#3D5C4A]/10" : k.status === "partial" ? "border-[#B8893E]/40 text-[#B8893E] bg-[#B8893E]/10" : "border-[#4A5568]/40 text-[#6B7280] bg-[#2A3F5F]/30"}`}>
                   {k.status === "strong" ? "✓ " : k.status === "partial" ? "⚠ " : "✗ "}{k.label}
                 </span>
               ))}
             </div>
             <div className="flex items-center gap-4 mt-6 pt-4 border-t border-[#2A3F5F]">
-              {[{ color: "bg-[#3D8B5E]", label: "Strong" }, { color: "bg-[#C5933A]", label: "Partial" }, { color: "bg-[#4A5568]", label: "Gap (easy fix)" }].map((l) => (
+              {[{ color: "bg-[#3D5C4A]", label: "Strong" }, { color: "bg-[#B8893E]", label: "Partial" }, { color: "bg-[#4A5568]", label: "Gap (easy fix)" }].map((l) => (
                 <div key={l.label} className="flex items-center gap-1.5"><div className={`w-2 h-2 ${l.color}`} /><span className="text-[#6B7280] text-xs">{l.label}</span></div>
               ))}
             </div>
@@ -251,7 +251,7 @@ function AboutJohn() {
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger}>
             <motion.div variants={fadeUp} className="mb-4"><div className="gold-rule" /></motion.div>
-            <motion.p variants={fadeUp} className="font-display text-2xl md:text-3xl font-light text-[#F9F7F3] leading-relaxed mb-8 italic">
+            <motion.p variants={fadeUp} className="font-display text-2xl md:text-3xl font-light text-[#F4EFE3] leading-relaxed mb-8 italic">
               &ldquo;Most resume tools were built by people who&rsquo;ve never hired anyone. This one was built by someone who has &mdash; for 30 years.&rdquo;
             </motion.p>
             <motion.div variants={fadeUp} className="space-y-4 text-[#9CA3AF] leading-relaxed text-sm">
@@ -267,15 +267,15 @@ function AboutJohn() {
               { num: "Dir → C-Suite", label: "Level of executives placed" },
               { num: "F500 → Startups", label: "Range of client organizations" },
             ].map((c, i) => (
-              <div key={i} className="flex items-center gap-6 bg-[#152338] border border-[#2A3F5F] p-5 hover:border-[#C5933A]/30 transition-colors">
-                <div className="font-display text-2xl font-light text-[#C5933A] min-w-[110px]">{c.num}</div>
+              <div key={i} className="flex items-center gap-6 bg-[#152338] border border-[#2A3F5F] p-5 hover:border-[#B8893E]/30 transition-colors">
+                <div className="font-display text-2xl font-light text-[#B8893E] min-w-[110px]">{c.num}</div>
                 <div className="text-[#9CA3AF] text-sm">{c.label}</div>
               </div>
             ))}
-            <div className="bg-[#0E1A2B] border border-[#C5933A]/20 p-5">
+            <div className="bg-[#0E1A2B] border border-[#B8893E]/20 p-5">
               <div className="flex items-center gap-2 mb-2">
-                <Shield size={14} className="text-[#C5933A]" />
-                <span className="text-[#C5933A] text-xs font-medium tracking-wider uppercase">The Insider Advantage</span>
+                <Shield size={14} className="text-[#B8893E]" />
+                <span className="text-[#B8893E] text-xs font-medium tracking-wider uppercase">The Insider Advantage</span>
               </div>
               <p className="text-[#9CA3AF] text-sm leading-relaxed">John knows what makes a hiring manager stop scrolling — because he was that hiring manager. Every recommendation in this tool comes from what he has seen actually work across thousands of executive searches.</p>
             </div>
@@ -336,29 +336,29 @@ function Pricing() {
     },
   ];
   return (
-    <section id="pricing" ref={ref} className="py-24 bg-[#0A1421]">
+    <section id="pricing" ref={ref} className="py-24 bg-[#0B1320]">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div initial="hidden" animate={inView ? "visible" : "hidden"} variants={stagger} className="text-center mb-16">
           <motion.div variants={fadeUp} className="flex justify-center mb-4"><div className="gold-rule" /></motion.div>
-          <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">Simple pricing</motion.h2>
+          <motion.h2 variants={fadeUp} className="font-display text-4xl md:text-5xl font-light text-[#F4EFE3] mb-4">Simple pricing</motion.h2>
           <motion.p variants={fadeUp} className="text-[#9CA3AF]">Every plan, every adventure — see real output before you pay.</motion.p>
         </motion.div>
         <div className="grid md:grid-cols-3 gap-px bg-[#2A3F5F]">
           {plans.map((plan, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: i * 0.1 }} className={`p-8 flex flex-col relative ${plan.highlight ? "bg-[#152338]" : "bg-[#0A1421]"}`}>
-              {plan.highlight && <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#C5933A] to-transparent" />}
+            <motion.div key={i} initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: i * 0.1 }} className={`p-8 flex flex-col relative ${plan.highlight ? "bg-[#152338]" : "bg-[#0B1320]"}`}>
+              {plan.highlight && <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#B8893E] to-transparent" />}
               <div className="text-xs text-[#6B7280] font-medium tracking-wider uppercase mb-4">{plan.name}</div>
-              <div className="font-display text-4xl font-light text-[#F9F7F3] mb-2">{plan.price}</div>
+              <div className="font-display text-4xl font-light text-[#F4EFE3] mb-2">{plan.price}</div>
               <p className="text-[#6B7280] text-sm leading-relaxed mb-8">{plan.desc}</p>
               <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2">
-                    <CheckCircle size={13} className="text-[#C5933A] mt-0.5 flex-shrink-0" />
+                    <CheckCircle size={13} className="text-[#B8893E] mt-0.5 flex-shrink-0" />
                     <span className="text-[#9CA3AF] text-sm">{f}</span>
                   </li>
                 ))}
               </ul>
-              <Link href={plan.ctaHref} className={`text-center py-3 text-sm font-semibold transition-colors block ${plan.highlight ? "bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B]" : "border border-[#2A3F5F] hover:border-[#C5933A]/40 text-[#9CA3AF] hover:text-[#F9F7F3]"}`}>
+              <Link href={plan.ctaHref} className={`text-center py-3 text-sm font-semibold transition-colors block ${plan.highlight ? "bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B]" : "border border-[#2A3F5F] hover:border-[#B8893E]/40 text-[#9CA3AF] hover:text-[#F4EFE3]"}`}>
                 {plan.cta}
               </Link>
             </motion.div>
@@ -372,18 +372,18 @@ function Pricing() {
 function FinalCTA() {
   return (
     <section className="py-32 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#C5933A 1px, transparent 1px), linear-gradient(90deg, #C5933A 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-[#C5933A]/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#B8893E 1px, transparent 1px), linear-gradient(90deg, #B8893E 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-[#B8893E]/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
         <div className="flex justify-center mb-6"><div className="gold-rule" /></div>
-        <h2 className="font-display text-4xl md:text-6xl font-light text-[#F9F7F3] mb-6 leading-tight">
+        <h2 className="font-display text-4xl md:text-6xl font-light text-[#F4EFE3] mb-6 leading-tight">
           Your career deserves a<br />
-          <em className="text-[#C5933A] italic font-normal">folio,</em> not a template.
+          <em className="text-[#B8893E] italic font-normal">folio,</em> not a template.
         </h2>
         <p className="font-display italic text-[#9CA3AF] text-xl mb-10 leading-relaxed">
           A folio is what a senior recruiter delivers — argument, evidence, decision-ready. We write yours.
         </p>
-        <a href="#adventures" className="group inline-flex items-center gap-3 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-10 py-5 text-base transition-all duration-200">
+        <a href="#adventures" className="group inline-flex items-center gap-3 bg-[#B8893E] hover:bg-[#8E6A2E] text-[#0E1A2B] font-semibold px-10 py-5 text-base transition-all duration-200">
           Open the folio
           <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
         </a>
