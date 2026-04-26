@@ -93,22 +93,17 @@ export default function SignupPage() {
     <div className="min-h-screen bg-[#0E1A2B] flex flex-col">
       {/* Nav */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A3F5F]">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 border border-[#C5933A] flex items-center justify-center">
-            <span className="text-[#C5933A] text-xs font-semibold">E</span>
-          </div>
-          <span className="text-[#F9F7F3] text-sm font-medium tracking-wider">EBRB</span>
-        </Link>
+        <Logo />
       </div>
 
       {/* Signup form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <h1 className="font-display text-3xl font-light text-[#F9F7F3] text-center mb-2">
-            Create your account
+            Open the folio
           </h1>
-          <p className="text-[#6B7280] text-sm text-center mb-8">
-            Unlock your full resume, cover letter, and exports
+          <p className="font-display italic text-[#9CA3AF] text-base text-center mb-8">
+            Save your conversation. Unlock your full folio, cover letter, and exports.
           </p>
 
           {error && (

@@ -71,8 +71,8 @@ export function AdventureGrid({ id = "adventures" }: { id?: string }) {
           <h2 className="font-display text-4xl md:text-5xl font-light text-[#F9F7F3] mb-4">
             Where are you stuck?
           </h2>
-          <p className="text-[#9CA3AF] leading-relaxed">
-            EBRB isn&apos;t just a resume rewriter. Pick the path that matches where you are — each one asks only for what it needs.
+          <p className="font-display italic text-[#9CA3AF] text-lg leading-relaxed">
+            Nilon Folio is a practice, not a template. Pick the path that matches where you are — each one asks only for what it needs.
           </p>
         </motion.div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

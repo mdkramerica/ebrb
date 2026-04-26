@@ -7,13 +7,13 @@ import { AuthProvider } from "@/components/AuthProvider";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "EBRB — Executive Brand & Resume Builder",
+  title: "Nilon Folio — Executive Repositioning Practice",
   description:
-    "Built by a recruiter with 30 years placing Directors, VPs, and C-Suite executives. We decode the job. Then we reposition you for it.",
+    "Every executive has a folio. Nilon writes yours. Built by a recruiter with thirty years placing Director through C-Suite executives. Decision-ready in minutes.",
   openGraph: {
-    title: "EBRB — Executive Brand & Resume Builder",
+    title: "Nilon Folio — Repositioning, not a template.",
     description:
-      "Built by a recruiter with 30 years placing Directors, VPs, and C-Suite executives.",
+      "The executive repositioning practice — built by a recruiter, not a template company.",
     type: "website",
   },
 };
@@ -38,7 +38,7 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>

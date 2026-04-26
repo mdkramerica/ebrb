@@ -53,7 +53,7 @@ function Nav() {
             )
           )}
           <Link href="/#adventures" className="bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] text-sm font-semibold px-5 py-2 transition-colors">
-            Get Started
+            Open the folio
           </Link>
         </div>
       </div>
@@ -72,17 +72,17 @@ function Hero() {
             <div className="h-px w-8 bg-[#C5933A]" />
             <span className="text-[#C5933A] text-xs font-medium tracking-[0.2em] uppercase">Built by a recruiter. Powered by AI.</span>
           </motion.div>
-          <motion.h1 variants={fadeUp} className="font-display text-5xl md:text-7xl font-light text-[#F9F7F3] leading-[1.05] mb-6">
-            Your career needs<br />
-            <em className="text-[#C5933A] not-italic">repositioning</em> —<br />
-            not a new template.
+          <motion.h1 variants={fadeUp} className="font-display text-5xl md:text-7xl font-light text-[#F9F7F3] leading-[0.95] mb-6 tracking-tight">
+            Every executive has<br />
+            a <em className="text-[#C5933A] italic font-normal">folio.</em><br />
+            Nilon writes yours.
           </motion.h1>
-          <motion.p variants={fadeUp} className="text-[#9CA3AF] text-lg md:text-xl font-light leading-relaxed mb-10 max-w-2xl">
-            Whether you&rsquo;re tailoring for a specific role, figuring out why you aren&rsquo;t getting interviews, or clarifying how to pitch yourself — pick the path that matches where you are. Built on 30 years of executive recruiting expertise.
+          <motion.p variants={fadeUp} className="font-display italic text-[#9CA3AF] text-xl md:text-2xl font-light leading-relaxed mb-10 max-w-2xl">
+            For Director through C-Suite executives. Decision-ready in minutes. Built on thirty years of executive search.
           </motion.p>
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <a href="#adventures" className="group flex items-center gap-2 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-8 py-4 text-sm tracking-wide transition-all duration-200">
-              See your paths
+              Open the folio
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </a>
             <a href="#how-it-works" className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F9F7F3] text-sm transition-colors">
@@ -90,7 +90,7 @@ function Hero() {
             </a>
           </motion.div>
           <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-6 mt-12 pt-12 border-t border-[#2A3F5F]">
-            {["30 years in executive search", "Director through C-Suite", "~93% ATS match rate", "Submission-ready in minutes"].map((s) => (
+            {["30 yrs exec search", "Director → C-Suite", "93% ATS match", "Decision-ready"].map((s) => (
               <div key={s} className="flex items-center gap-2">
                 <CheckCircle size={13} className="text-[#C5933A]" />
                 <span className="text-[#9CA3AF] text-xs">{s}</span>
@@ -257,7 +257,7 @@ function AboutJohn() {
             <motion.div variants={fadeUp} className="space-y-4 text-[#9CA3AF] leading-relaxed text-sm">
               <p>John Nilon has spent three decades at the center of executive talent. Starting at Kenexa in 1994 — when it was a 40-person firm — then placing CEOs and their direct reports at VC-backed startups at Howard Fischer Associates, before founding J.N. Solutions in 2001.</p>
               <p>For 25 years, J.N. Solutions has been engaged to identify transformational leaders — Director through C-Suite — at companies ranging from emerging startups to Fortune 500s, across pharmaceutical, biotech, and clinical research.</p>
-              <p>He built EBRB because he kept seeing the same problem: exceptional candidates underselling themselves with the wrong language for the wrong audience.</p>
+              <p>He built Nilon Folio because he kept seeing the same problem: exceptional candidates underselling themselves with the wrong language for the wrong audience.</p>
             </motion.div>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 24 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.6, delay: 0.2 }} className="space-y-3">
@@ -377,12 +377,14 @@ function FinalCTA() {
       <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
         <div className="flex justify-center mb-6"><div className="gold-rule" /></div>
         <h2 className="font-display text-4xl md:text-6xl font-light text-[#F9F7F3] mb-6 leading-tight">
-          Your career deserves more<br />
-          <em className="text-[#C5933A] not-italic">than a template.</em>
+          Your career deserves a<br />
+          <em className="text-[#C5933A] italic font-normal">folio,</em> not a template.
         </h2>
-        <p className="text-[#9CA3AF] text-lg mb-10 leading-relaxed">Pick a path. Bring only what it needs. See real output before you pay.</p>
+        <p className="font-display italic text-[#9CA3AF] text-xl mb-10 leading-relaxed">
+          A folio is what a senior recruiter delivers — argument, evidence, decision-ready. We write yours.
+        </p>
         <a href="#adventures" className="group inline-flex items-center gap-3 bg-[#C5933A] hover:bg-[#A67C2E] text-[#0E1A2B] font-semibold px-10 py-5 text-base transition-all duration-200">
-          Choose your path
+          Open the folio
           <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
         </a>
         <div className="flex items-center justify-center gap-6 mt-8 flex-wrap">
