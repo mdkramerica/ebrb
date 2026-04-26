@@ -315,7 +315,7 @@ function Pricing() {
         "Executive bio, LinkedIn summary, interview-prep stories",
         "Modular achievement library",
       ],
-      cta: "Get Started",
+      cta: "Open the folio",
       ctaHref: "/#adventures",
       highlight: true,
     },
