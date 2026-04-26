@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send, Plus, ArrowLeft, Loader2, MessageSquare, Lock } from "lucide-react";
 import { Nav } from "@/components/Nav";
+import { AssistantMarkdown } from "@/components/AssistantMarkdown";
 
 type Role = "user" | "assistant" | "system";
 
@@ -400,9 +401,7 @@ export default function ChatClient({
                   }`}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="whitespace-pre-wrap font-mono text-xs leading-relaxed">
-                      {msg.content}
-                    </div>
+                    <AssistantMarkdown content={msg.content} />
                   ) : (
                     <div>{msg.content}</div>
                   )}
@@ -412,11 +411,9 @@ export default function ChatClient({
 
             {streamingContent && (
               <div className="flex justify-start">
-                <div className="max-w-2xl text-[#E5E7EB] text-sm leading-relaxed">
-                  <div className="whitespace-pre-wrap font-mono text-xs leading-relaxed">
-                    {streamingContent}
-                    <span className="inline-block w-1.5 h-3 bg-[#C5933A] animate-pulse ml-0.5" />
-                  </div>
+                <div className="max-w-2xl">
+                  <AssistantMarkdown content={streamingContent} />
+                  <span className="inline-block w-1.5 h-3 bg-[#C5933A] animate-pulse ml-0.5 align-middle" />
                 </div>
               </div>
             )}
